@@ -1,0 +1,32 @@
+[
+  {
+    "id": 2,
+    "nome": "Logística norte",
+    "cnpj": "98.765.432/0001-12",
+    "cidade": "Porto Alegre",
+    "estado": "RS",
+    "email": "contato@logisticasul.com",
+    "telefone": "(51) 99876-5432",
+    "endereco": "Rua da Logística, 99",
+    "cep": "90123-456",
+    "responsavel": "Maria Oliveira",
+    "dataCadastro": "2024-03-10",
+    "status": "ativo",
+    "observacoes": "Cliente com contrato anual."
+  },
+  {
+    "id": 3,
+    "nome": "Logística Sul",
+    "cnpj": "12.345.678/0001-90",
+    "cidade": "São Paulo",
+    "estado": "SP",
+    "email": "bairrocolsantoantonio@gmail.com",
+    "telefone": "11988882222",
+    "endereco": "Rua das Palmeiras, 456 - São Paulo, SP",
+    "cep": "01234-567",
+    "responsavel": "João da Silva",
+    "dataCadastro": "2025-07-26",
+    "status": "ativo",
+    "observacoes": "Cliente com prioridade em entregas no sul do país."
+  }
+]

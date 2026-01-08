@@ -1,0 +1,50 @@
+[
+  {
+    "id": 2,
+    "nome": "Erick ",
+    "telefone": "(92) 98888-2222",
+    "cnh": "D",
+    "email": "ericksaraiva30@gmail.com",
+    "cpf": "987.654.321-00",
+    "rg": "87654321",
+    "validadeCnh": "2025-11-30",
+    "endereco": "rua sao paulo",
+    "status": "Ativo"
+  },
+  {
+    "nome": "Jose",
+    "telefone": "(92)99526-8015",
+    "cnh": "E",
+    "email": "teste@teste.com",
+    "cpf": "123123123",
+    "rg": "123123123",
+    "validadeCnh": "2025-07-24",
+    "endereco": "rua fulano de talls",
+    "status": "Ativo",
+    "id": 4
+  },
+  {
+    "nome": "Fernando",
+    "telefone": "(92)99999-8888",
+    "cnh": "D",
+    "email": "teste@teste",
+    "cpf": "123123123",
+    "rg": "123123123",
+    "validadeCnh": "2025-07-09",
+    "endereco": "teste",
+    "status": "Ativo",
+    "id": 5
+  },
+  {
+    "nome": "Dutra",
+    "telefone": "(92)99999-9999",
+    "cnh": "E",
+    "email": "teste@teste",
+    "cpf": "123123",
+    "rg": "123123",
+    "validadeCnh": "2025-07-09",
+    "endereco": "123123",
+    "status": "Ativo",
+    "id": 6
+  }
+]

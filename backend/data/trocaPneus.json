@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "caminhaoId": 1,
+    "codigoPneu": "MIC-235-001",
+    "dataTroca": "2024-07-20",
+    "posicao": "Traseira Direita",
+    "marca": "Pirelle",
+    "observacao": "Desgaste lateral"
+  },
+  {
+    "id": 2,
+    "caminhaoId": 2,
+    "codigoPneu": "GOD-452-123",
+    "dataTroca": "2024-06-15",
+    "posicao": "Dianteira Esquerda",
+    "marca": "Goodyear",
+    "observacao": "Troca preventiva"
+  },
+  {
+    "id": 3,
+    "caminhaoId": 3,
+    "codigoPneu": "MIC-235-002",
+    "dataTroca": "2024-07-22",
+    "posicao": "Dianteira Direita",
+    "marca": "Michelin",
+    "observacao": ""
+  },
+  {
+    "id": 4,
+    "caminhaoId": 4,
+    "codigoPneu": "BRI-789-456",
+    "dataTroca": "2024-05-10",
+    "posicao": "Traseira Esquerda",
+    "marca": "Bridgestone",
+    "observacao": "Furo reparado"
+  }
+]

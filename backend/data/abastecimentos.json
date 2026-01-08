@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "caminhaoId": 1,
+    "data": "2024-07-15",
+    "litros": 200,
+    "valorLitro": 5.89,
+    "posto": "Shell - BR 101",
+    "odometro": 152000,
+    "tipoCombustivel": "Diesel S10",
+    "observacoes": "Abastecimento completo antes de viagem"
+  },
+  {
+    "caminhaoId": 5,
+    "data": "2025-07-30",
+    "litros": 161,
+    "valorLitro": 2.1,
+    "posto": "Shell - BR 101",
+    "odometro": 20,
+    "tipoCombustivel": "Diesel S10",
+    "observacoes": "",
+    "id": 2
+  }
+]

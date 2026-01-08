@@ -1,0 +1,45 @@
+  [
+  {
+    "id": 13,
+    "razaoSocial": "Transportadora Treviso Ltda",
+    "nomeFantasia": "Treviso Logística",
+    "cnpj": "45.123.789/0001-20",
+    "inscricaoEstadual": "1029384756",
+    "segmento": "Transporte Rodoviário de Cargas",
+    "produtosServicos": ["Transporte de carga seca", "Logística integrada"],
+    "cidade": "Campinas",
+    "estado": "SP",
+    "email": "contato@trevisologistica.com.br",
+    "telefone": "(19) 3200-4567",
+    "endereco": "Av. das Indústrias, 2500 - Distrito Industrial",
+    "cep": "13069-400",
+    "responsavel": "João da Silva",
+    "cargoResponsavel": "Gerente de Operações",
+    "dataCadastro": "2025-07-30",
+    "status": "ativo",
+    "condicoesPagamento": "30 dias após emissão",
+    "observacoes": "Cliente ativo com bom histórico de pagamentos"
+  },
+  {
+    "id": 14,
+    "razaoSocial": "Erick Saraiva Serviços de Transporte ME",
+    "nomeFantasia": "Saraiva Transportes",
+    "cnpj": "12.345.678/0001-90",
+    "inscricaoEstadual": "9988776655",
+    "segmento": "Transporte de Combustíveis",
+    "produtosServicos": ["Transporte de combustível", "Distribuição regional"],
+    "cidade": "Ribeirão Preto",
+    "estado": "SP",
+    "email": "erick@saraivatransportes.com",
+    "telefone": "(16) 99876-5432",
+    "endereco": "Rua das Palmeiras, 456 - Centro",
+    "cep": "14010-300",
+    "responsavel": "Erick Saraiva",
+    "cargoResponsavel": "Diretor Executivo",
+    "dataCadastro": "2025-07-29",
+    "status": "ativo",
+    "condicoesPagamento": "Antecipado com 5% de desconto",
+    "observacoes": "Necessita homologação para transporte interestadual"
+  }
+]
+

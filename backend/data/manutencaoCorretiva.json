@@ -1,0 +1,14 @@
+[
+   {
+    "id": 1,
+    "caminhaoId": 4,
+    "data": "2024-06-10",
+    "tipo": "Corretiva",
+    "quilometragem": 120000,
+    "oficina": "Oficina São Pedro",
+    "custo": 100,
+    "proximaRevisao": "2024-12-10",
+    "observacoes": "Troca de filtros e verificação geral.",
+    "status": "Concluída"
+  }
+]

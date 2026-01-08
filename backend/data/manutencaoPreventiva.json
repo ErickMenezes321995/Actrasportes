@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "caminhaoId": 4,
+    "data": "2024-06-10",
+    "tipo": "Corretiva",
+    "quilometragem": 120000,
+    "oficina": "Oficina São Pedro",
+    "custo": 100,
+    "proximaRevisao": "2024-12-10",
+    "observacoes": "Troca de filtros e verificação geral.",
+    "status": "Concluída"
+  },
+  {
+    "id": 2,
+    "caminhaoId": "3",
+    "data": "2024-07-15",
+    "tipo": "Revisão Completa",
+    "quilometragem": 90000,
+    "oficina": "Mecânica TruckMaster",
+    "custo": 2200,
+    "proximaRevisao": "2025-01-15",
+    "observacoes": "Incluiu troca de óleo, pastilhas de freio e alinhamento.",
+    "status": "Concluída"
+  }
+]

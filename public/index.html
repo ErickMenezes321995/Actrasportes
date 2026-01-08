@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Favicon e ícones para gestão de frota -->
+    <link rel="icon" href="%PUBLIC_URL%/assets/tr.png" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1a365d" />
+    <meta
+      name="description"
+      content="Sistema completo de gestão de frota para controle de caminhões, manutenções, abastecimentos e trocas de pneus"
+    />
+    
+    <!-- Meta tags para compartilhamento -->
+    <meta property="og:title" content="Gestão de Frota - Sistema Completo" />
+    <meta property="og:description" content="Controle total da sua frota de caminhões com sistema de gestão de manutenções, abastecimentos, trocas de pneus e muito mais." />
+    <meta property="og:image" content="https://gestaofrota.vercel.app/assets/tr.png" />
+    <meta property="og:url" content="https://gestaofrota.vercel.app/" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/assets/tr.png" />
+    
+    <!-- Manifest para PWA -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Título do sistema -->
+    <title>Gestão de Frota</title>
+    
+    <style>
+      /* Estilos para a tela de carregamento do PWA */
+      @media all and (display-mode: standalone) {
+        body {
+          background-color: #1a365d;
+          color: white;
+          font-family: Arial, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+        }
+        
+        .splash-screen {
+          text-align: center;
+        }
+        
+        .splash-screen img {
+          width: 120px;
+          height: 120px;
+          margin-bottom: 20px;
+        }
+        
+        .splash-screen h1 {
+          font-size: 24px;
+          margin-bottom: 10px;
+        }
+        
+        .splash-screen p {
+          font-size: 16px;
+          opacity: 0.8;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Tela de carregamento para PWA -->
+    <div class="splash-screen" style="display: none;">
+      <img src="%PUBLIC_URL%/assets/tr.png" alt="Logo Gestão de Frota" />
+      <h1>Gestão de Frota</h1>
+      <p>Carregando sistema...</p>
+    </div>
+    
+    <noscript>Você precisa habilitar JavaScript para utilizar o sistema de gestão de frota.</noscript>
+    <div id="root"></div>
+
+    <script>
+      // Script para mostrar a tela de carregamento quando instalado como PWA
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        document.querySelector('.splash-screen').style.display = 'flex';
+        document.getElementById('root').style.display = 'none';
+        
+        // Esconder a tela de carregamento quando o React carregar
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            document.querySelector('.splash-screen').style.display = 'none';
+            document.getElementById('root').style.display = 'block';
+          }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1752744861297,
+    "origem": "belem",
+    "destino": "venezuela",
+    "motorista": "Erick ",
+    "viatura": "BRA-1234",
+    "dataInicio": "2025-07-17T05:35",
+    "dataTermino": "2025-07-17T09:46:47.331Z",
+    "status": "Concluída",
+    "cliente": "teste",
+    "pesoCarga": "8",
+    "valorMercadoria": "30000",
+    "cte": "teste",
+    "nfe": "123123",
+    "pedido": "123123",
+    "observacao": "",
+    "odometro": 123123,
+    "transacoes": [
+      {
+        "id": 1752745547406,
+        "idViagem": 1752744861297,
+        "data": "2025-07-17",
+        "descricao": "Frete",
+        "valor": 9000,
+        "responsavel": "Cliente",
+        "tipo": "Receita"
+      }
+    ]
+  }
+]

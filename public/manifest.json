@@ -1,0 +1,21 @@
+{
+  "short_name": "Frota",
+  "name": "Gestão de Frota",
+  "icons": [
+    {
+      "src": "assets/scania.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/scania.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1a365d",
+  "background_color": "#ffffff"
+}
+
