@@ -89,6 +89,8 @@ interface ConsumoMedio {
   kmRodados: number;
   consumoMedio: number;
   custoTotal: number;
+  custoPorKm: number; // NOVO: custo por km rodado
+  economiaPrevista?: number; // NOVO: economia em relação a uma média esperada
 }
 
 const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({ 
@@ -143,7 +145,7 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
     setAbastecimentosFiltrados(resultado);
   }, [periodoFiltro, tipoFiltro, abastecimentos]);
 
-  // Processar dados para o dashboard - CORRIGIDA
+  // Processar dados para o dashboard - ATUALIZADA com custo por km
   const processarDadosDashboard = useCallback(() => {
     try {
       setIsLoading(true);
@@ -172,6 +174,12 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
           
           if (kmRodados > 0 && totalLitros > 0) {
             const consumoMedio = kmRodados / totalLitros;
+            const custoPorKm = custoTotal / kmRodados;
+            
+            // Adicionar cálculo de economia (opcional)
+            const consumoEsperado = 3.5; // 3.5 km/L como meta de referência
+            const economiaPrevista = consumoMedio > consumoEsperado ? 
+              ((consumoMedio - consumoEsperado) / consumoEsperado) * 100 : 0;
             
             consumoPorCaminhao.push({
               caminhaoId: caminhao.id,
@@ -179,8 +187,10 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
               modelo: caminhao.modelo,
               totalLitros,
               kmRodados,
-              consumoMedio,
-              custoTotal
+              consumoMedio: parseFloat(consumoMedio.toFixed(2)),
+              custoTotal,
+              custoPorKm: parseFloat(custoPorKm.toFixed(3)),
+              economiaPrevista: parseFloat(economiaPrevista.toFixed(1))
             });
           }
         }
@@ -232,6 +242,13 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
   const mesesUnicos = Array.from(new Set(abastecimentosFiltrados.map(a => a.data.substring(0, 7)))).length;
   const mediaMensal = mesesUnicos > 0 ? Math.round(totalLitros / mesesUnicos) : 0;
   const custoTotal = abastecimentosFiltrados.reduce((sum, a) => sum + a.valorTotal, 0);
+  
+  // Novas métricas agregadas
+  const totalKmRodados = dadosConsumo.reduce((sum, item) => sum + item.kmRodados, 0);
+  const consumoMedioFrota = dadosConsumo.length > 0 ? 
+    (dadosConsumo.reduce((sum, item) => sum + item.consumoMedio, 0) / dadosConsumo.length) : 0;
+  const custoMedioPorKmFrota = dadosConsumo.length > 0 ? 
+    (dadosConsumo.reduce((sum, item) => sum + item.custoPorKm, 0) / dadosConsumo.length) : 0;
 
   // Agrupar por mês para gráfico
   const abastecimentosPorMes = abastecimentosFiltrados.reduce((acc, abastecimento) => {
@@ -297,6 +314,24 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
           <Text fontWeight="bold">{label}</Text>
           <Text color={payload[0].color}>
             Litros: {payload[0].value.toLocaleString('pt-BR')} L
+          </Text>
+        </Box>
+      );
+    }
+    return null;
+  };
+
+  const CustomTooltipCustoKm = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <Box bg="white" p={3} borderRadius="md" boxShadow="md" borderWidth="1px">
+          <Text fontWeight="bold">{label}</Text>
+          <Text color={payload[0].color}>
+            Custo/km: {payload[0].value.toLocaleString('pt-BR', { 
+              style: 'currency', 
+              currency: 'BRL',
+              minimumFractionDigits: 3
+            })}
           </Text>
         </Box>
       );
@@ -394,7 +429,7 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
               <TabPanels>
                 {/* Painel: Visão Geral */}
                 <TabPanel px={2}>
-                  <SimpleGrid columns={2} spacing={3} mb={4}>
+                  <SimpleGrid columns={3} spacing={3} mb={4}>
                     <Card bg={cardBg} border="1px" borderColor={borderColor} size="sm">
                       <CardBody py={3}>
                         <Stat>
@@ -402,6 +437,20 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
                           <StatNumber fontSize="lg">{totalLitros.toLocaleString('pt-BR')} L</StatNumber>
                           <Text fontSize="xs" color={textColor}>
                             {mediaMensal.toLocaleString('pt-BR')} L/mês
+                          </Text>
+                        </Stat>
+                      </CardBody>
+                    </Card>
+                    
+                    <Card bg={cardBg} border="1px" borderColor={borderColor} size="sm">
+                      <CardBody py={3}>
+                        <Stat>
+                          <StatLabel fontSize="xs">Total Km Rodados</StatLabel>
+                          <StatNumber fontSize="lg">
+                            {totalKmRodados.toLocaleString('pt-BR')} km
+                          </StatNumber>
+                          <Text fontSize="xs" color={textColor}>
+                            {dadosConsumo.length} caminhões
                           </Text>
                         </Stat>
                       </CardBody>
@@ -420,6 +469,40 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
                           </StatNumber>
                           <Text fontSize="xs" color={textColor}>
                             {abastecimentosFiltrados.length} abastecimentos
+                          </Text>
+                        </Stat>
+                      </CardBody>
+                    </Card>
+                  </SimpleGrid>
+
+                  <SimpleGrid columns={2} spacing={3} mb={4}>
+                    <Card bg={cardBg} border="1px" borderColor={borderColor} size="sm">
+                      <CardBody py={3}>
+                        <Stat>
+                          <StatLabel fontSize="xs">Consumo Médio Frota</StatLabel>
+                          <StatNumber fontSize="lg">
+                            {consumoMedioFrota.toFixed(2)} km/L
+                          </StatNumber>
+                          <Text fontSize="xs" color={textColor}>
+                            Meta: 3.5 km/L
+                          </Text>
+                        </Stat>
+                      </CardBody>
+                    </Card>
+                    
+                    <Card bg={cardBg} border="1px" borderColor={borderColor} size="sm">
+                      <CardBody py={3}>
+                        <Stat>
+                          <StatLabel fontSize="xs">Custo Médio/km</StatLabel>
+                          <StatNumber fontSize="lg">
+                            {custoMedioPorKmFrota.toLocaleString('pt-BR', { 
+                              style: 'currency', 
+                              currency: 'BRL',
+                              minimumFractionDigits: 3
+                            })}
+                          </StatNumber>
+                          <Text fontSize="xs" color={textColor}>
+                            Por km rodado
                           </Text>
                         </Stat>
                       </CardBody>
@@ -460,12 +543,12 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
                     </Card>
 
                     <Card bg={cardBg} border="1px" borderColor={borderColor}>
-                      <CardHeader fontWeight="bold" py={2} fontSize="sm">Top Caminhões</CardHeader>
+                      <CardHeader fontWeight="bold" py={2} fontSize="sm">Top Caminhões (Km)</CardHeader>
                       <CardBody py={2}>
                         {dadosConsumo.slice(0, 3).map(caminhao => (
                           <Flex key={caminhao.caminhaoId} justify="space-between" mb={1}>
                             <Text fontSize="xs">{caminhao.placa}</Text>
-                            <Badge fontSize="xs">{caminhao.totalLitros.toLocaleString('pt-BR')} L</Badge>
+                            <Badge fontSize="xs">{caminhao.kmRodados.toLocaleString('pt-BR')} km</Badge>
                           </Flex>
                         ))}
                       </CardBody>
@@ -500,6 +583,29 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
                     </CardBody>
                   </Card>
 
+                  <Card bg={cardBg} border="1px" borderColor={borderColor} mb={4}>
+                    <CardHeader fontWeight="bold" py={2} fontSize="sm">Custo por Km por Caminhão</CardHeader>
+                    <CardBody py={2}>
+                      <ResponsiveContainer width="100%" height={150}>
+                        <BarChart data={dadosConsumo.slice(0, 5)}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                          <XAxis dataKey="placa" fontSize={10} />
+                          <YAxis 
+                            fontSize={10}
+                            tickFormatter={(value) => `R$${value.toFixed(3)}`}
+                          />
+                          <RechartsTooltip content={<CustomTooltipCustoKm />} />
+                          <Bar 
+                            dataKey="custoPorKm" 
+                            fill="#38A169" 
+                            radius={[2, 2, 0, 0]} 
+                            name="Custo por Km"
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardBody>
+                  </Card>
+
                   {dadosConsumo.length > 0 && (
                     <Card bg={cardBg} border="1px" borderColor={borderColor}>
                       <CardHeader fontWeight="bold" py={2} fontSize="sm">Consumo por Caminhão</CardHeader>
@@ -508,16 +614,54 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
                           <Thead>
                             <Tr>
                               <Th fontSize="xs" px={2} py={1}>Caminhão</Th>
-                              <Th fontSize="xs" px={2} py={1} isNumeric>Litros</Th>
+                              <Th fontSize="xs" px={2} py={1} isNumeric>Km Rodados</Th>
                               <Th fontSize="xs" px={2} py={1} isNumeric>Consumo</Th>
+                              <Th fontSize="xs" px={2} py={1} isNumeric>Custo/Km</Th>
+                              <Th fontSize="xs" px={2} py={1} isNumeric>Economia</Th>
                             </Tr>
                           </Thead>
                           <Tbody>
                             {dadosConsumo.slice(0, 5).map((item) => (
                               <Tr key={item.caminhaoId}>
-                                <Td fontSize="xs" px={2} py={1}>{item.placa}</Td>
-                                <Td fontSize="xs" px={2} py={1} isNumeric>{item.totalLitros.toLocaleString('pt-BR')} L</Td>
-                                <Td fontSize="xs" px={2} py={1} isNumeric>{item.consumoMedio.toFixed(2)} km/L</Td>
+                                <Td fontSize="xs" px={2} py={1}>
+                                  <Box>
+                                    <Text fontWeight="medium">{item.placa}</Text>
+                                    <Text fontSize="xs" color="gray.500">{item.modelo}</Text>
+                                  </Box>
+                                </Td>
+                                <Td fontSize="xs" px={2} py={1} isNumeric>
+                                  {item.kmRodados.toLocaleString('pt-BR')} km
+                                </Td>
+                                <Td fontSize="xs" px={2} py={1} isNumeric>
+                                  <Badge 
+                                    colorScheme={
+                                      item.consumoMedio > 4 ? "green" : 
+                                      item.consumoMedio > 3.5 ? "yellow" : "red"
+                                    }
+                                    fontSize="xs"
+                                  >
+                                    {item.consumoMedio.toFixed(2)} km/L
+                                  </Badge>
+                                </Td>
+                                <Td fontSize="xs" px={2} py={1} isNumeric>
+                                  {item.custoPorKm.toLocaleString('pt-BR', { 
+                                    style: 'currency', 
+                                    currency: 'BRL',
+                                    minimumFractionDigits: 3
+                                  })}
+                                </Td>
+                                <Td fontSize="xs" px={2} py={1} isNumeric>
+                                  {item.economiaPrevista ? (
+                                    <Badge 
+                                      colorScheme={item.economiaPrevista > 0 ? "green" : "red"}
+                                      fontSize="xs"
+                                    >
+                                      {item.economiaPrevista > 0 ? '+' : ''}{item.economiaPrevista}%
+                                    </Badge>
+                                  ) : (
+                                    <Text fontSize="xs">N/A</Text>
+                                  )}
+                                </Td>
                               </Tr>
                             ))}
                           </Tbody>
@@ -540,6 +684,7 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
                             <Th fontSize="xs" px={2} py={1}>Combustível</Th>
                             <Th fontSize="xs" px={2} py={1} isNumeric>Litros</Th>
                             <Th fontSize="xs" px={2} py={1} isNumeric>Valor</Th>
+                            <Th fontSize="xs" px={2} py={1} isNumeric>Odômetro</Th>
                           </Tr>
                         </Thead>
                         <Tbody>
@@ -574,6 +719,9 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
                                     minimumFractionDigits: 0
                                   })}
                                 </Td>
+                                <Td fontSize="xs" px={2} py={1} isNumeric>
+                                  {abastecimento.odometro.toLocaleString('pt-BR')} km
+                                </Td>
                               </Tr>
                             );
                           })}
@@ -591,9 +739,9 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
           <Button size="sm" variant="outline" mr={3} onClick={onClose}>
             Fechar
           </Button>
-          {/* <Button size="sm" colorScheme="blue" onClick={handleExportData} leftIcon={<DownloadIcon />}>
+          <Button size="sm" colorScheme="blue" onClick={handleExportData} leftIcon={<DownloadIcon />}>
             Exportar
-          </Button> */}
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

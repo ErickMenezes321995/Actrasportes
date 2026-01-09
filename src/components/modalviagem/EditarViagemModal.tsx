@@ -121,7 +121,7 @@ const handleSalvar = () => {
           mt={1}
           mr={1}
         />
-        <ModalBody pb={4} px={4} pt={4}>
+        <ModalBody pb={4} px={4} pt={4} maxH="70vh" overflowY="auto">
           <Grid templateColumns="repeat(2, 1fr)" gap={3}>
             {[
               ["origem", "Origem"],
