@@ -635,8 +635,8 @@ const ModalDashboardAbastecimentoAnalitico: React.FC<Props> = ({
                                 <Td fontSize="xs" px={2} py={1} isNumeric>
                                   <Badge 
                                     colorScheme={
-                                      item.consumoMedio > 4 ? "green" : 
-                                      item.consumoMedio > 3.5 ? "yellow" : "red"
+                                      item.consumoMedio > 2.5 ? "green" : 
+                                      item.consumoMedio > 2 ? "yellow" : "red"
                                     }
                                     fontSize="xs"
                                   >

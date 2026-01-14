@@ -17,6 +17,7 @@ import Login from "./pages/login/index";
 import { PrivateRoute } from "./PrivateRoute";
 import Perfil from "./pages/perfil";
 import CadastroUsuario from "./components/cadastro/CadastroUsuario";
+import Rota from "./pages/Rota/Index"
 
 export const RoutesApp = () => {
   return (
@@ -36,6 +37,7 @@ export const RoutesApp = () => {
       <Route path="/relatorio" element={<PrivateRoute><Relatorio /></PrivateRoute>} />
       <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
       <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
+      <Route path="/rota/:id" element={<Rota />}/>
     </Routes>
   );
 };

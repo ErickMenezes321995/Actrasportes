@@ -70,7 +70,6 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
     setIsSaving(true);
 
     try {
-      // ✅ Validação local antes de enviar
       if (!formData.nome.trim() || !formData.cnpj.trim()) {
         toast({
           title: "Preencha os campos obrigatórios",
@@ -83,15 +82,13 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
         return;
       }
 
-      // ✅ Formata dataCadastro se estiver vazio
       const payload = {
         ...formData,
         dataCadastro: formData.dataCadastro
           ? formData.dataCadastro
-          : new Date().toISOString().split("T")[0], // YYYY-MM-DD
+          : new Date().toISOString().split("T")[0], 
       };
 
-      // ✅ Envia para o backend
       const response = await fetch(
         "https://gestaofrota.onrender.com/api/clientes",
         {
@@ -107,7 +104,6 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
         throw new Error(data.error || "Erro ao criar cliente");
       }
 
-      // ✅ Sucesso
       toast({
         title: "Cliente cadastrado com sucesso",
         status: "success",
@@ -115,10 +111,9 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
         isClosable: true,
       });
 
-      onSalvar(); // atualiza lista no pai
-      onClose(); // fecha modal
+      onSalvar(); 
+      onClose(); 
 
-      // ✅ Reset do formulário
       setFormData(formDataInicial);
     } catch (error: any) {
       console.error(error);
@@ -160,7 +155,6 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
         />
         <ModalBody pb={4} px={4} pt={4} maxH="70vh" overflowY="auto">
           <Grid templateColumns="repeat(2, 1fr)" gap={3}>
-            {/* Primeira coluna */}
             <GridItem colSpan={2}>
               <FormControl isRequired mb={3}>
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Nome</FormLabel>
@@ -260,7 +254,6 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
               </FormControl>
             </GridItem>
 
-            {/* Segunda coluna */}
             <GridItem>
               <FormControl isRequired mb={3}>
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Cidade</FormLabel>

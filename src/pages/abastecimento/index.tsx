@@ -280,7 +280,7 @@ const GestaoCombustiveis: React.FC = () => {
           </Flex>
         </CardHeader>
 
-        <CardBody p={0}>
+        <CardBody p={0} maxH="70vh" overflowY="auto">
           <Table variant="simple" size="sm">
             <Thead>
               <Tr bg="#f0f0f0">
