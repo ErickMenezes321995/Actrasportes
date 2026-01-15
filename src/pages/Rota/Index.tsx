@@ -30,6 +30,7 @@ interface PontoRota {
   timestamp: string;
   cidade: string;
   estado: string;
+   bairro?: string;
   status: 'em_movimento' | 'parado' | 'descanso' | 'Chegada';
   velocidade: number;
   descricao?: string;

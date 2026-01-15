@@ -29,8 +29,6 @@ import SelecionarMotoristaEquipamentoModal from "../../components/modalviagem/in
 import EditarViagemModal from "../../components/modalviagem/EditarViagemModal";
 
 import axios from "axios";
-import { color } from "framer-motion";
-
 
 type StatusViagem = "Pendente" | "Em andamento" | "Concluída" | "Cancelada";
 
@@ -247,10 +245,10 @@ const GestaoViagens: React.FC = () => {
     onClose: onModalEditarClose,
   } = useDisclosure();
 
-  // Verificar se é mobile
+
   const isMobile = useBreakpointValue({ base: true, md: false });
 
-  // Contadores de status
+
   const statusCounts = {
     Pendente: viagens.filter(v => v.status === "Pendente").length,
     "Em andamento": viagens.filter(v => v.status === "Em andamento").length,
@@ -263,7 +261,6 @@ const GestaoViagens: React.FC = () => {
       try {
         setIsLoading(true);
         
-        // Timeout de 20 segundos
         const timeout = setTimeout(() => {
           setIsLoading(false);
         }, 20000);

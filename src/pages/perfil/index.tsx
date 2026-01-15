@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
-  Card,
-  CardBody,
   Flex,
   Heading,
   Avatar,
@@ -35,7 +33,6 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "../../firebase/config";
 import { onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 
-// Tema personalizado para imitar o estilo do ExtJS
 const extjsTheme = extendTheme({
   colors: {
     extjs: {
@@ -159,6 +156,51 @@ const Perfil: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
+
+  
+  // ✅ showError com useCallback
+  const showError = useCallback((message: string) => {
+    toast({
+      title: "Erro",
+      description: message,
+      status: "error",
+      duration: 4000,
+      isClosable: true,
+      position: "top-right"
+    });
+  }, [toast]);
+
+  // ✅ showSuccess com useCallback
+  const showSuccess = useCallback((message: string) => {
+    toast({
+      title: "Sucesso",
+      description: message,
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+      position: "top-right"
+    });
+  }, [toast]);
+
+  // ✅ loadUserData com useCallback
+  const loadUserData = useCallback(async (uid: string) => {
+    try {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data() as UserProfile;
+        setUser(userData);
+        setEditUser(userData);
+        localStorage.setItem("usuarioLogado", JSON.stringify(userData));
+      } else {
+        showError("Perfil do usuário não encontrado.");
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados do usuário:", error);
+      showError("Não foi possível carregar os dados do perfil.");
+    }
+  }, [showError]);
+
+  // ✅ useEffect corrigido
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -181,46 +223,8 @@ const Perfil: React.FC = () => {
     });
 
     return () => unsubscribe();
-  }, [toast]);
-
-  const showError = (message: string) => {
-    toast({
-      title: "Erro",
-      description: message,
-      status: "error",
-      duration: 4000,
-      isClosable: true,
-      position: "top-right"
-    });
-  };
-
-  const showSuccess = (message: string) => {
-    toast({
-      title: "Sucesso",
-      description: message,
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-      position: "top-right"
-    });
-  };
-
-  const loadUserData = async (uid: string) => {
-    try {
-      const userDoc = await getDoc(doc(db, "users", uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data() as UserProfile;
-        setUser(userData);
-        setEditUser(userData);
-        localStorage.setItem("usuarioLogado", JSON.stringify(userData));
-      } else {
-        showError("Perfil do usuário não encontrado.");
-      }
-    } catch (error) {
-      console.error("Erro ao carregar dados do usuário:", error);
-      showError("Não foi possível carregar os dados do perfil.");
-    }
-  };
+  }, [loadUserData, showError]);
+ 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     if (!editUser) return;

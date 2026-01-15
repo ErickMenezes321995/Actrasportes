@@ -77,7 +77,6 @@ function StatusTag({ status }: { status: string }) {
 
 const DashboardDespesas: React.FC = () => {
   const [despesas, setDespesas] = useState<DespesaItem[]>([]);
-  const toast = useToast();
 
   useEffect(() => {
     const mock: DespesaItem[] = [
