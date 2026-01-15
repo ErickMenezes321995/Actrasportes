@@ -31,10 +31,9 @@ import EditarViagemModal from "../../components/modalviagem/EditarViagemModal";
 import axios from "axios";
 import { color } from "framer-motion";
 
-// Tipagem do status
+
 type StatusViagem = "Pendente" | "Em andamento" | "Concluída" | "Cancelada";
 
-// Tipagem da viagem
 interface Viagem {
   id: number;
   origem: string;

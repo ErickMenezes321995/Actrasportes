@@ -30,7 +30,6 @@ interface PontoRota {
   timestamp: string;
   cidade: string;
   estado: string;
-  bairro?: string;
   status: 'em_movimento' | 'parado' | 'descanso' | 'Chegada';
   velocidade: number;
   descricao?: string;
@@ -52,6 +51,12 @@ interface Viagem {
   status: "Pendente" | "Em andamento" | "Concluída" | "Cancelada";
 }
 
+interface RotaCalculada {
+  coordenadas: [number, number][];
+  distancia: number; 
+  duracao: number;   
+}
+
 const PONTOS_MOCK: PontoRota[] = [
   {
     id: 1,
@@ -60,25 +65,21 @@ const PONTOS_MOCK: PontoRota[] = [
     timestamp: '2024-01-15T08:00:00',
     cidade: 'Manaus',
     estado: 'AM',
-    bairro: 'Compensa',
     status: 'em_movimento',
     velocidade: 0,
     descricao: 'Saida'
   },
-
-  //  {
-  //   id: 2,
-  //   latitude: -0.20968,
-  //   longitude: -60.69295,
-  //   timestamp: '2024-01-15T14:00:00',
-  //   cidade: 'Boa Vista',
-  //   estado: 'BVB',
-  //   bairro: 'Boa Vista ',
-  //   status: 'em_movimento',
-  //   velocidade: 80,
-  //   descricao: 'em_movimento'
-  // },
- 
+  {
+    id: 2,
+    latitude: -2.05348,    
+    longitude: -60.02330,
+    timestamp: '2024-01-15T10:30:00',
+    cidade: 'Presidente Figueiredo',  
+    estado: 'AM',                     
+    status: 'em_movimento',
+    velocidade: 80,
+    descricao: 'Rodoviária de Presidente Figueiredo'
+  },
   {
     id: 3,
     latitude: 2.8235,
@@ -86,7 +87,6 @@ const PONTOS_MOCK: PontoRota[] = [
     timestamp: '2024-01-15T14:00:00',
     cidade: 'Boa Vista',
     estado: 'BVB',
-    bairro: 'Boa Vista ',
     status: 'Chegada',
     velocidade: 0,
     descricao: 'Chegada'
@@ -95,8 +95,7 @@ const PONTOS_MOCK: PontoRota[] = [
 
 const ORIGEM_MOCK = 'Flores ';
 const DESTINO_MOCK = 'Ponta Negra';
-const PONTO_ATUAL_MOCK = PONTOS_MOCK[0]; 
-
+const PONTO_ATUAL_MOCK = PONTOS_MOCK[1]; 
 
 function AjustarMapa({ pontos }: { pontos: PontoRota[] }) {
   const map = useMap();
@@ -111,8 +110,41 @@ function AjustarMapa({ pontos }: { pontos: PontoRota[] }) {
   return null;
 }
 
-const obterRotaRealista = async (pontos: PontoRota[]): Promise<[number, number][]> => {
-  if (pontos.length < 2) return [];
+const formatarDistancia = (metros: number): string => {
+  if (metros < 1000) {
+    return `${Math.round(metros)} m`;
+  } else {
+    const km = metros / 1000;
+    if (km > 100) {
+      return `${Math.round(km)} km`;
+    }
+    return `${km.toFixed(1)} km`;
+  }
+};
+
+const calcularDistanciaEmLinhaReta = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371e3; 
+  const φ1 = lat1 * Math.PI / 180;
+  const φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; 
+};
+
+const obterRotaRealista = async (pontos: PontoRota[]): Promise<RotaCalculada> => {
+  if (pontos.length < 2) {
+    return {
+      coordenadas: [],
+      distancia: 0,
+      duracao: 0
+    };
+  }
 
   try {
     const coordenadas = pontos.map(p => `${p.longitude},${p.latitude}`).join(';');
@@ -124,16 +156,53 @@ const obterRotaRealista = async (pontos: PontoRota[]): Promise<[number, number][
     const data = await response.json();
     
     if (data.routes && data.routes[0]) {
-      const geometry = data.routes[0].geometry;
+      const route = data.routes[0];
+      const geometry = route.geometry;
+      
+      let coordenadasFormatadas: [number, number][] = [];
+      
       if (geometry.type === 'LineString') {
-        return geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
+        coordenadasFormatadas = geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
       }
+      
+      return {
+        coordenadas: coordenadasFormatadas,
+        distancia: route.distance, 
+        duracao: route.duration    
+      };
     }
     
-    return pontos.map(p => [p.latitude, p.longitude] as [number, number]);
+    const distanciaCalculada = calcularDistanciaEmLinhaReta(
+      pontos[0].latitude, pontos[0].longitude,
+      pontos[pontos.length - 1].latitude, pontos[pontos.length - 1].longitude
+    );
+    
+    return {
+      coordenadas: pontos.map(p => [p.latitude, p.longitude] as [number, number]),
+      distancia: distanciaCalculada,
+      duracao: 0 
+    };
   } catch (error) {
     console.error('Erro ao obter rota da OSRM:', error);
-    return pontos.map(p => [p.latitude, p.longitude] as [number, number]);
+    
+    if (pontos.length >= 2) {
+      const distanciaCalculada = calcularDistanciaEmLinhaReta(
+        pontos[0].latitude, pontos[0].longitude,
+        pontos[pontos.length - 1].latitude, pontos[pontos.length - 1].longitude
+      );
+      
+      return {
+        coordenadas: pontos.map(p => [p.latitude, p.longitude] as [number, number]),
+        distancia: distanciaCalculada,
+        duracao: 0
+      };
+    }
+    
+    return {
+      coordenadas: [],
+      distancia: 0,
+      duracao: 0
+    };
   }
 };
 
@@ -144,55 +213,54 @@ const Mapa: React.FC<MapaGratuitoProps> = ({
   destino = DESTINO_MOCK 
 }) => {
   const [mapaCarregado, setMapaCarregado] = useState(false);
-  const [rotaDetalhada, setRotaDetalhada] = useState<[number, number][]>([]);
+  const [rotaCalculada, setRotaCalculada] = useState<RotaCalculada | null>(null);
   const [carregandoRota, setCarregandoRota] = useState(true);
   const [mostrarRotaRealista, setMostrarRotaRealista] = useState(true);
   const [viagemBasica, setViagemBasica] = useState<Viagem | null>(null);
   const { id } = useParams<{ id: string }>();
+  
   useEffect(() => {
     const carregarRota = async () => {
       setCarregandoRota(true);
       const rota = await obterRotaRealista(pontos);
-      setRotaDetalhada(rota);
+      setRotaCalculada(rota);
       setCarregandoRota(false);
     };
     
     carregarRota();
   }, [pontos]);
 
-useEffect(() => {
-  if (!id) return;
-  async function fetchViagemBasica() {
-    try {
-      const response = await fetch(
-        `https://gestaofrota.onrender.com/api/viagens/${id}`
-      );
+  useEffect(() => {
+    if (!id) return;
+    async function fetchViagemBasica() {
+      try {
+        const response = await fetch(
+          `https://gestaofrota.onrender.com/api/viagens/${id}`
+        );
 
-      if (!response.ok) {
-        throw new Error("Erro ao buscar viagem");
+        if (!response.ok) {
+          throw new Error("Erro ao buscar viagem");
+        }
+
+        const data = await response.json();
+
+        const viagemBasica: Viagem = {
+          id: data.id,
+          origem: data.origem,
+          destino: data.destino,
+          motorista: data.motorista,
+          viatura: data.viatura,
+          status: data.status,
+        };
+
+        setViagemBasica(viagemBasica);
+      } catch (err) {
+        console.error("Erro ao buscar origem/destino", err);
       }
-
-      const data = await response.json();
-
-      const viagemBasica: Viagem = {
-        id: data.id,
-        origem: data.origem,
-        destino: data.destino,
-        motorista: data.motorista,
-        viatura: data.viatura,
-        status: data.status,
-      };
-
-      setViagemBasica(viagemBasica);
-    } catch (err) {
-      console.error("Erro ao buscar origem/destino", err);
     }
-  }
 
-  fetchViagemBasica();
-}, [id]);
-
-
+    fetchViagemBasica();
+  }, [id]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -237,13 +305,13 @@ useEffect(() => {
   const linhaReta = pontos.map(p => [p.latitude, p.longitude] as [number, number]);
 
   const calcularRotaPercorrida = () => {
-    if (!pontoAtual || rotaDetalhada.length === 0) return [];
+    if (!pontoAtual || !rotaCalculada || rotaCalculada.coordenadas.length === 0) return [];
     
     const pontoAtualIndex = pontos.findIndex(p => p.id === pontoAtual.id);
     if (pontoAtualIndex <= 0) return [];
     
     const pontoAtualCoords: [number, number] = [pontoAtual.latitude, pontoAtual.longitude];
-    const distances = rotaDetalhada.map(coord => 
+    const distances = rotaCalculada.coordenadas.map(coord => 
       Math.sqrt(
         Math.pow(coord[0] - pontoAtualCoords[0], 2) + 
         Math.pow(coord[1] - pontoAtualCoords[1], 2)
@@ -252,10 +320,32 @@ useEffect(() => {
     
     const closestIndex = distances.indexOf(Math.min(...distances));
     
-    return rotaDetalhada.slice(0, closestIndex + 1);
+    return rotaCalculada.coordenadas.slice(0, closestIndex + 1);
   };
 
   const rotaPercorrida = calcularRotaPercorrida();
+
+const calcularDistanciaTotal = (coordenadas: [number, number][]): number => {
+  if (coordenadas.length < 2) return 0;
+  
+  let distanciaTotal = 0;
+  
+  for (let i = 0; i < coordenadas.length - 1; i++) {
+    const [lat1, lon1] = coordenadas[i];
+    const [lat2, lon2] = coordenadas[i + 1];
+    distanciaTotal += calcularDistanciaEmLinhaReta(lat1, lon1, lat2, lon2);
+  }
+  
+  return distanciaTotal;
+};
+
+const calcularDistanciaPercorrida = () => {
+  if (!rotaCalculada || rotaPercorrida.length < 2) return 0;
+  const distanciaRealPercorrida = calcularDistanciaTotal(rotaPercorrida);  
+  return distanciaRealPercorrida;
+};
+
+  const distanciaPercorrida = calcularDistanciaPercorrida();
 
   if (pontos.length === 0) {
     return (
@@ -269,12 +359,11 @@ useEffect(() => {
   }
 
   const statusColorMap = {
-  Pendente: { bg: "yellow.100", color: "yellow.700" },
-  "Em andamento": { bg: "blue.100", color: "blue.700" },
-  Concluída: { bg: "green.100", color: "green.700" },
-  Cancelada: { bg: "red.100", color: "red.700" },
-};
-
+    Pendente: { bg: "yellow.100", color: "yellow.700" },
+    "Em andamento": { bg: "blue.100", color: "blue.700" },
+    Concluída: { bg: "green.100", color: "green.700" },
+    Cancelada: { bg: "red.100", color: "red.700" },
+  };
 
   return (
     <Box w="100%" h="80%" position="relative" borderRadius="lg" overflow="hidden" marginTop="55px">
@@ -292,8 +381,7 @@ useEffect(() => {
           }}
         />
 
-      
-        {mostrarRotaRealista && rotaDetalhada.length > 1 && (
+        {mostrarRotaRealista && rotaCalculada && rotaCalculada.coordenadas.length > 1 && (
           <>
             <Polyline
               pathOptions={{ 
@@ -301,7 +389,7 @@ useEffect(() => {
                 weight: 6, 
                 opacity: 0.4,
               }}
-              positions={rotaDetalhada}
+              positions={rotaCalculada.coordenadas}
             />
             
             {rotaPercorrida.length > 1 && (
@@ -339,7 +427,6 @@ useEffect(() => {
           >
             <Popup>
               <VStack align="start" spacing={1}>
-                <Text fontWeight="bold">{ponto.bairro}</Text>
                 <Text fontSize="sm">{ponto.cidade} - {ponto.estado}</Text>
                 <Badge colorScheme={
                   ponto.status === 'em_movimento' ? 'green' :
@@ -352,7 +439,6 @@ useEffect(() => {
                 {ponto.descricao && (
                   <Text fontSize="xs" color="gray.600">{ponto.descricao}</Text>
                 )}
-             
               </VStack>
             </Popup>
           </Marker>
@@ -373,11 +459,11 @@ useEffect(() => {
         zIndex="1000"
       >
         <VStack align="start" spacing={3}>
-         {viagemBasica?.status && (
+          {viagemBasica?.status && (
             <Box
-               padding="6px"
-               borderRadius="10px"
-               fontWeight="bold"
+              padding="6px"
+              borderRadius="10px"
+              fontWeight="bold"
               bg={statusColorMap[viagemBasica.status].bg}
               color={statusColorMap[viagemBasica.status].color}
             >
@@ -385,12 +471,47 @@ useEffect(() => {
             </Box>
           )}
           <Text fontSize="md" color="gray.700" fontWeight="bold">
-          {viagemBasica
-        ? `${viagemBasica.origem} → ${viagemBasica.destino}`
-        : `${origem} → ${destino}`}
+            {viagemBasica
+              ? `${viagemBasica.origem} → ${viagemBasica.destino}`
+              : `${origem} → ${destino}`}
           </Text>
+          
+          {rotaCalculada && rotaCalculada.distancia > 0 && (
+            <Box>
+              <Text fontSize="sm" fontWeight="bold" color="gray.700">
+                📏 Distância total:
+              </Text>
+              <Text fontSize="sm" color="gray.600">
+                {formatarDistancia(rotaCalculada.distancia)}
+              </Text>
+            </Box>
+          )}
+          
+          {distanciaPercorrida > 0 && (
+            <Box>
+              <Text fontSize="sm" fontWeight="bold" color="gray.700">
+                🚚 Percorrido:
+              </Text>
+              <Text fontSize="sm" color="gray.600">
+                {formatarDistancia(distanciaPercorrida)}
+              </Text>
+            </Box>
+          )}
+          
           {pontoAtual && (
             <>
+               <Box padding="0px" fontWeight="bold">
+                Motorista: 
+                <Box fontFamily="sans-serif" fontWeight="normal">
+                  {viagemBasica?.motorista || 'Pendente'}
+                </Box>
+              </Box>
+              <Box padding="0px" fontWeight="bold">
+                Equipamento: 
+                <Box fontFamily="sans-serif" fontWeight="normal">
+                  {viagemBasica?.viatura || 'Modelo'} 
+                </Box> 
+              </Box>
               <Badge 
                 colorScheme={
                   pontoAtual.status === 'em_movimento' ? 'green' :
@@ -405,30 +526,6 @@ useEffect(() => {
                  pontoAtual.status === 'parado' ? 'Parado' : 'Descanso'}
                 {pontoAtual.status === 'em_movimento' && ` • ${pontoAtual.velocidade} km/h`}
               </Badge>
-                <Box
-                  padding="0px"
-                  fontWeight="bold"
-                >
-                 Motorista: 
-                 <Box
-                  fontFamily="sans-serif"
-                 fontWeight="normal"
-                 >{viagemBasica?.motorista || 'Pendente'}</Box>
-                </Box>
-                 <Box
-                  padding="0px"
-                  fontWeight="bold"
-                >
-                 Equipamento: 
-                 <Box 
-                 fontFamily="sans-serif"
-                 fontWeight="normal"
-                 
-                 >{viagemBasica?.viatura || 'Modelo'} </Box> 
-                </Box>
-              <Text fontSize="sm" color="gray.600">
-                📍 {pontoAtual.bairro}
-              </Text>
             </>
           )}
           {carregandoRota && (
