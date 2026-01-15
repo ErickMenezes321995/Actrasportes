@@ -101,7 +101,7 @@ const GestaoMotoristas: React.FC = () => {
 
   useEffect(() => {
     fetchMotoristas();
-  }, []);
+  }, [fetchMotoristas]);
 
   // Deletar motorista
   const deletarMotorista = async (id: number) => {

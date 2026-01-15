@@ -37,12 +37,8 @@ import {
   MdRadioButtonChecked,
   MdInvertColors,
   MdLocalGasStation,
-  MdDescription,
   MdDriveEta,
   MdAppRegistration,
-  MdDashboard,
-  MdSettings,
-  MdAnalytics
 } from "react-icons/md";
 import { IconType } from "react-icons";
 import { useNavigate, useLocation } from "react-router-dom";
