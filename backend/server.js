@@ -11,7 +11,6 @@ mongoose.connect("mongodb+srv://ericksaraiva30:Manu080424@viagem.z1qglcj.mongodb
   .then(() => console.log("✅ Conectado ao MongoDB Atlas"))
   .catch((err) => console.error("❌ Erro ao conectar no MongoDB", err));
 
-// Rotas
 app.use("/api/viagens", require("./routes/viagens"));
 app.use("/api/motoristas", require("./routes/motoristas"));
 app.use("/api/caminhoes", require("./routes/caminhoes"));
@@ -36,7 +35,7 @@ app.use("/api/perfil", perfilRouter);
 const usuariosRouter = require("./routes/usuarios");
 app.use("/api/usuarios", usuariosRouter);
 
-// Adicione uma rota de health check
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'online',
@@ -49,7 +48,7 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
   
-  // ⭐⭐ IMPORTANTE: Iniciar o keep-alive apenas DEPOIS que o servidor estiver rodando ⭐⭐
+
   if (process.env.NODE_ENV === 'production') {
     const KeepAlive = require('./keep-alive');
     new KeepAlive().start();

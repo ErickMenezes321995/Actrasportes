@@ -77,10 +77,10 @@ const Sidebar = ({ children }: SidebarProps) => {
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
   const [username, setUsername] = useState("");
   const [userCargo, setUserCargo] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Cores harmonizadas - esquema azul/índigo profissional
   const sidebarBg = useColorModeValue("#1E293B", "#0F172A");
   const headerBg = useColorModeValue("#1E293B", "#0F172A");
   const activeBg = useColorModeValue("#3B82F6", "#2563EB");
@@ -97,14 +97,13 @@ const Sidebar = ({ children }: SidebarProps) => {
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
           try {
-            // Buscar dados do usuário no Firestore
             const userDoc = await getDoc(doc(db, "users", user.uid));
             if (userDoc.exists()) {
               const userData = userDoc.data();
               setUsername(userData.nome || "Usuário");
               setUserCargo(userData.cargo || "Colaborador");
+              setUserEmail(userData.email || "@Email");
               
-              // Salvar também no localStorage para compatibilidade
               localStorage.setItem("usuarioLogado", JSON.stringify({
                 ...userData,
                 id: user.uid
@@ -113,24 +112,27 @@ const Sidebar = ({ children }: SidebarProps) => {
               console.log("Documento do usuário não encontrado");
               setUsername("Usuário");
               setUserCargo("Colaborador");
+               setUserEmail("@Email");
             }
           } catch (error) {
             console.error("Erro ao carregar dados do usuário:", error);
             setUsername("Usuário");
             setUserCargo("Colaborador");
+             setUserEmail("@Email");
           }
         } else {
-          // Fallback para localStorage se não estiver autenticado
           const usuarioLogadoStr = localStorage.getItem("usuarioLogado");
           if (usuarioLogadoStr) {
             try {
               const usuarioLogado: Usuario = JSON.parse(usuarioLogadoStr);
               setUsername(usuarioLogado.nome || "Usuário");
               setUserCargo(usuarioLogado.cargo || "Colaborador");
+               setUserEmail(usuarioLogado.email || "@Email");
             } catch (error) {
               console.error("Erro ao carregar dados do usuário:", error);
               setUsername("Usuário");
               setUserCargo("Colaborador");
+               setUserEmail("@Email");
             }
           }
         }
@@ -141,7 +143,6 @@ const Sidebar = ({ children }: SidebarProps) => {
 
     loadUserData();
 
-    // Ouvir mudanças no localStorage
     const handleStorageChange = () => {
       const usuarioLogadoStr = localStorage.getItem("usuarioLogado");
       if (usuarioLogadoStr) {
@@ -149,6 +150,7 @@ const Sidebar = ({ children }: SidebarProps) => {
           const usuarioLogado: Usuario = JSON.parse(usuarioLogadoStr);
           setUsername(usuarioLogado.nome || "Usuário");
           setUserCargo(usuarioLogado.cargo || "Colaborador");
+           setUserEmail(usuarioLogado.email || "@Email");
         } catch (error) {
           console.error("Erro ao carregar dados do usuário:", error);
         }
@@ -163,9 +165,10 @@ const Sidebar = ({ children }: SidebarProps) => {
       if (usuarioLogadoStr) {
         try {
           const usuarioLogado: Usuario = JSON.parse(usuarioLogadoStr);
-          if (usuarioLogado.nome !== username || usuarioLogado.cargo !== userCargo) {
+          if (usuarioLogado.nome !== username || usuarioLogado.cargo !== userCargo || usuarioLogado.email !== userEmail) {
             setUsername(usuarioLogado.nome || "Usuário");
             setUserCargo(usuarioLogado.cargo || "Colaborador");
+             setUserEmail(usuarioLogado.email || "@Email");
           }
         } catch (error) {
           console.error("Erro ao carregar dados do usuário:", error);
@@ -177,7 +180,7 @@ const Sidebar = ({ children }: SidebarProps) => {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, [username, userCargo]);
+  }, [username, userCargo, userEmail]);
 
   const toggleCollapse = () => setCollapsed(!collapsed);
 
@@ -512,10 +515,13 @@ const Sidebar = ({ children }: SidebarProps) => {
             py={1} 
             borderColor={borderColor}
             boxShadow="xl"
+            zIndex="1000"
           >
             <Box px={3} py={2} borderBottom="1px" borderColor={borderColor}>
               <Text fontSize="sm" fontWeight="medium">{username}</Text>
-              <Text fontSize="xs" color="gray.400">{userCargo}</Text>
+              {/* <Text fontSize="xs" color="gray.400">{userCargo}</Text> */}
+               <Text fontSize="xs" color="gray.400">{userEmail || "@Email"}</Text>
+               
             </Box>
             <MenuItem
               onClick={() => navigate("/perfil")}

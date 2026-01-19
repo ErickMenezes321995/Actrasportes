@@ -13,13 +13,13 @@ import {
   GridItem,
   CSSReset,
   ThemeProvider,
-  extendTheme
+  extendTheme,
+  ModalBody
 } from "@chakra-ui/react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase/config";
 
-// Tema personalizado para imitar o estilo do ExtJS
 const extjsTheme = extendTheme({
   colors: {
     extjs: {
@@ -118,7 +118,6 @@ const CadastroUsuario: React.FC = () => {
     setLoading(true);
 
     try {
-      // 1. Criar usuário no Authentication
       const userCredential = await createUserWithEmailAndPassword(
         auth, 
         formData.email, 
@@ -127,7 +126,6 @@ const CadastroUsuario: React.FC = () => {
       
       const user = userCredential.user;
       
-      // 2. Salvar dados adicionais no Firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         nome: formData.nome,
@@ -152,7 +150,6 @@ const CadastroUsuario: React.FC = () => {
         isClosable: true,
       });
       
-      // Limpar formulário
       setFormData({
         nome: "",
         email: "",
@@ -232,6 +229,7 @@ const CadastroUsuario: React.FC = () => {
           
           <Box p="20px">
             <form onSubmit={handleSubmit}>
+               <ModalBody pb={4} px={4} pt={4} maxH="70vh" overflowY="auto">
               <Grid templateColumns="repeat(2, 1fr)" gap="15px" w="100%">
                 <GridItem colSpan={2}>
                   <FormControl isRequired>
@@ -378,6 +376,7 @@ const CadastroUsuario: React.FC = () => {
                   </FormControl>
                 </GridItem>
               </Grid>
+              </ModalBody>
 
               <Button
                 variant="extjs"

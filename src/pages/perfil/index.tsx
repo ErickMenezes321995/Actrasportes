@@ -157,8 +157,6 @@ const Perfil: React.FC = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
 
 
-  
-  // ✅ showError com useCallback
   const showError = useCallback((message: string) => {
     toast({
       title: "Erro",
@@ -295,7 +293,6 @@ const handleSave = async () => {
   } catch (error: any) {
     console.error("❌ Erro detalhado ao atualizar:", error);
     
-    // 🔍 Log mais detalhado para debugging
     if (error.code) {
       console.log("Código do erro:", error.code);
       console.log("Mensagem do erro:", error.message);
@@ -405,7 +402,6 @@ const handleSave = async () => {
       <CSSReset />
       <Box bg="trasnparent" minH="100vh" pt="90px" px={4} marginTop={35}>
         <Box maxW="800px" mx="auto">
-          {/* Card de Informações do Perfil */}
           <Box 
             bg="white" 
             borderRadius="4px" 
@@ -565,7 +561,7 @@ const handleSave = async () => {
           <ModalContent>
             <ModalHeader>Editar Perfil</ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
+            <ModalBody  pb={4} px={4} pt={4} maxH="70vh" overflowY="auto">
               <VStack spacing={4}>
                 <FormControl>
                   <FormLabel>Nome Completo</FormLabel>

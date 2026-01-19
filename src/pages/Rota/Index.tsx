@@ -1,4 +1,3 @@
-// src/pages/Rota/MapaGratuito.tsx
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -371,7 +370,7 @@ const calcularDistanciaPercorrida = () => {
       <MapContainer
         center={[-3.0667, -60.0167]} 
         zoom={12}
-        style={{ height: '550px', width: '100%', borderRadius: '8px' }}
+        style={{ height: '550px', width: '100%', borderRadius: '8px',   zIndex: 1, position: 'relative'  }}
         scrollWheelZoom={true}
       >
         <TileLayer

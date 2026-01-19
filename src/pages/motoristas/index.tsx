@@ -81,7 +81,6 @@ const GestaoMotoristas: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
-  // Função para buscar motoristas
   const fetchMotoristas = async () => {
     try {
       setIsLoading(true);
@@ -101,9 +100,8 @@ const GestaoMotoristas: React.FC = () => {
 
   useEffect(() => {
     fetchMotoristas();
-  }, [fetchMotoristas]);
+  }, []);
 
-  // Deletar motorista
   const deletarMotorista = async (id: number) => {
     try {
       await axios.delete(`https://gestaofrota.onrender.com/api/motoristas/${id}`);
