@@ -20,6 +20,8 @@ import {
   NumberDecrementStepper,
   Grid,
   GridItem,
+  InputLeftElement,
+  InputGroup  
 } from "@chakra-ui/react";
 
 interface Caminhao {
@@ -345,46 +347,63 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
           </GridItem>
 
           <GridItem colSpan={1}>
-            <FormControl isRequired mb={2}>
-              <FormLabel
-              fontSize="12px"
-              fontWeight="bold"
-              color="#666666"
-              >Valor por Litro (R$)</FormLabel>
-              <NumberInput
-                value={formData.valorLitro}
-                min={0}
-                step={0.01}
-                precision={3}
-                onChange={(value) => handleNumberChange("valorLitro", value)}
-              >
-                <NumberInputField
-                 height="40px"
-                  fontSize="14px"
-                  borderRadius="6px"
-                  borderColor="gray.300"
-                  _hover={{ borderColor: "gray.400" }}
-                  _focus={{
-                    borderColor: "blue.400",
-                    boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
-                  }}
-                  px="12px"
-                />
-                <NumberInputStepper>
-                  <NumberIncrementStepper 
-                   border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                  <NumberDecrementStepper
-                   border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                </NumberInputStepper>
-              </NumberInput>
-            </FormControl>
-          </GridItem>
+           <FormControl isRequired>
+               <FormLabel
+                 fontSize="12px"
+                 fontWeight="500"
+                 color="gray.600"
+                 mb="4px"
+               >
+                 Valor por Litro
+               </FormLabel>
+           
+               <InputGroup>
+                 <InputLeftElement
+                   pointerEvents="none"
+                   height="40px"
+                   fontSize="14px"
+                   color="gray.500"
+                   children="R$"
+                 />
+                 <Input
+                   key={`valor-${formData.valorLitro}`} // chave única baseada no valor
+                   defaultValue={formData.valorLitro > 0 ? 
+                     formData.valorLitro.toLocaleString('pt-BR', {
+                       minimumFractionDigits: 2,
+                       maximumFractionDigits: 2
+                     }) : ""}
+                   placeholder="0,00"
+                   height="40px"
+                   fontSize="14px"
+                   borderRadius="6px"
+                   borderColor="gray.300"
+                   pl="40px"
+                   pr="12px"
+                   _hover={{ borderColor: "gray.400" }}
+                   _focus={{
+                     borderColor: "blue.400",
+                     boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+                   }}
+                   onBlur={(e) => {
+                     // Formata o valor ao sair do campo
+                     let value = e.target.value.trim();
+                     
+                     if (value === '') {
+                       handleNumberChange("valorLitro", 0);
+                       return;
+                     }
+                     
+                     // Remove pontos de milhares e converte vírgula para ponto
+                     const numericValue = parseFloat(
+                       value.replace(/\./g, '').replace(',', '.')
+                     ) || 0;
+                     
+                     handleNumberChange("valorLitro", numericValue);
+                   }}
+                 />
+               </InputGroup>
+             </FormControl>
+           </GridItem>
         
 
           <GridItem colSpan={1}>
