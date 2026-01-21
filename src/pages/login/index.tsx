@@ -102,12 +102,9 @@ const LoginPage = () => {
     setErro("");
 
     try {
-      // Autenticação com Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, senha);
       const user = userCredential.user;
 
-      // Aqui você pode buscar os dados adicionais do usuário do Firestore se necessário
-      // Por enquanto, vamos criar um objeto usuário básico
       const usuario: Usuario = {
         id: user.uid,
         nome: user.displayName || "Usuário",
@@ -118,7 +115,7 @@ const LoginPage = () => {
         cargo: "",
         departamento: "",
         status: "ativo",
-        tipo: "usuario" // Você pode ajustar isso conforme sua lógica
+        tipo: "usuario" 
       };
 
       localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
@@ -130,7 +127,6 @@ const LoginPage = () => {
     } catch (error: any) {
       console.error("Erro no login:", error);
       
-      // Tratamento de erros comuns do Firebase
       switch (error.code) {
         case "auth/invalid-email":
           setErro("E-mail inválido");
@@ -177,7 +173,6 @@ const LoginPage = () => {
         position: "top-right"
       });
       
-      // Fechar o modal após 2 segundos
       setTimeout(() => {
         onClose();
         setResetEmail("");
