@@ -20,6 +20,8 @@ import {
   NumberDecrementStepper,
   Grid,
   GridItem,
+  InputLeftElement,
+  InputGroup
 } from "@chakra-ui/react";
 
 interface Caminhao {
@@ -372,38 +374,59 @@ const NovoManutencaoModal: React.FC<NovoManutencaoModalProps> = ({
               fontWeight="bold"
               color="#666666"
               >Custo (R$)</FormLabel>
-              <NumberInput
-                value={formData.custo}
-                min={0}
-                step={0.01}
-                precision={2}
-                onChange={(value) => handleNumberChange("custo", value)}
-              >
-                <NumberInputField
-                 height="33px"
-                  fontSize="14px"
-                  borderRadius="6px"
-                  borderColor="gray.300"
-                  _hover={{ borderColor: "gray.400" }}
-                  _focus={{
-                    borderColor: "blue.400",
-                    boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
-                  }}
-                  px="12px"
-                />
-                <NumberInputStepper>
-                  <NumberIncrementStepper 
-                   border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                  <NumberDecrementStepper 
-                   border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                </NumberInputStepper>
-              </NumberInput>
+            <InputGroup>
+              <InputLeftElement
+                pointerEvents="none"
+                height="33px"
+                fontSize="14px"
+                color="gray.500"
+                children="R$"
+              />
+            <Input
+                type="text"
+                placeholder="0,00"
+                defaultValue={formData.custo === 0 ? "" : formData.custo.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+                height="33px"
+                fontSize="14px"
+                borderRadius="6px"
+                borderColor="gray.300"
+                pl="40px"
+                pr="12px"
+                _hover={{ borderColor: "gray.400" }}
+                _focus={{
+                  borderColor: "blue.400",
+                  boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+                }}
+                onBlur={(e) => {
+                  let v = e.target.value.trim();
+                  
+                  if (v === '') {
+                    handleNumberChange("custo", 0);
+                    return;
+                  }
+                  
+                  const rawValue = v.replace(/\./g, '');
+                  const lastComma = rawValue.lastIndexOf(',');
+                  const lastDot = rawValue.lastIndexOf('.');
+                  const lastSeparator = Math.max(lastComma, lastDot);
+                  
+                  let numericValue;
+                  if (lastSeparator !== -1) {
+                    const integerPart = rawValue.substring(0, lastSeparator).replace(/[^\d]/g, '');
+                    const decimalPart = rawValue.substring(lastSeparator + 1).replace(/[^\d]/g, '');
+                    const fullNumber = integerPart + '.' + decimalPart;
+                    numericValue = parseFloat(fullNumber) || 0;
+                  } else {
+                    numericValue = parseFloat(rawValue) || 0;
+                  }
+                  
+                  handleNumberChange("custo", numericValue);
+                }}
+              />
+            </InputGroup>
             </FormControl>
           </GridItem>
         
