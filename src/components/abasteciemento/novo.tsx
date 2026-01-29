@@ -316,40 +316,49 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
               >
                 Litros abastecidos
               </FormLabel>
-
-              <NumberInput
-                value={formData.litros}
-                min={0}
-                precision={2}
-                onChange={(value) => handleNumberChange("litros", value)}
-                clampValueOnBlur={false}
-              >
-                <NumberInputField
-                  height="40px"
-                  fontSize="14px"
-                  borderRadius="6px"
-                  borderColor="gray.300"
-                  _hover={{ borderColor: "gray.400" }}
-                  _focus={{
-                    borderColor: "blue.400",
-                    boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
-                  }}
-                  px="12px"
-                />
-
-                <NumberInputStepper>
-                  <NumberIncrementStepper
-                    border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                  <NumberDecrementStepper
-                    border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                </NumberInputStepper>
-              </NumberInput>
+           <InputGroup>
+            <InputLeftElement
+                pointerEvents="none"
+                height="40px"
+                fontSize="14px"
+                color="gray.500"
+                children="L"
+              />
+            <Input
+                key={`litros-${formData.litros}`} 
+                defaultValue={formData.litros > 0 ? 
+                  formData.litros.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }) : ""}
+                placeholder="Quantidade abastecida"
+                height="40px"
+                fontSize="14px"
+                borderRadius="6px"
+                borderColor="gray.300"
+                pl="40px"
+                pr="12px"
+                _hover={{ borderColor: "gray.400" }}
+                _focus={{
+                  borderColor: "blue.400",
+                  boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+                }}
+                onBlur={(e) => {
+                  let value = e.target.value.trim();
+                  
+                  if (value === '') {
+                    handleNumberChange("litros", 0);
+                    return;
+                  }
+                  
+                  const numericValue = parseFloat(
+                    value.replace(/\./g, '').replace(',', '.')
+                  ) || 0;
+                  
+                  handleNumberChange("litros", numericValue);
+                }}
+              />
+              </InputGroup>
             </FormControl>
           </GridItem>
 
@@ -374,7 +383,7 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
                     children="R$"
                   />
                   <Input
-                    key={`valor-${formData.valorLitro}`} // chave única baseada no valor
+                    key={`valor-${formData.valorLitro}`} 
                     defaultValue={formData.valorLitro > 0 ? 
                       formData.valorLitro.toLocaleString('pt-BR', {
                         minimumFractionDigits: 2,

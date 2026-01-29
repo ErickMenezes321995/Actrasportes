@@ -311,38 +311,49 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
               fontWeight="bold"
               color="#666666"
               >Litros Abastecidos</FormLabel>
-              <NumberInput
-                value={formData.litros}
-                min={0}
-                step={1}
-                precision={2}
-                onChange={(value) => handleNumberChange("litros", value)}
-              >
-                <NumberInputField
-                 height="40px"
+              <InputGroup>
+              <InputLeftElement
+                  pointerEvents="none"
+                  height="40px"
+                  fontSize="14px"
+                  color="gray.500"
+                  children="L"
+                />
+              <Input
+                  key={`litros-${formData.litros}`} 
+                  defaultValue={formData.litros > 0 ? 
+                    formData.litros.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }) : ""}
+                  placeholder="Quantidade abastecida"
+                  height="40px"
                   fontSize="14px"
                   borderRadius="6px"
                   borderColor="gray.300"
+                  pl="40px"
+                  pr="12px"
                   _hover={{ borderColor: "gray.400" }}
                   _focus={{
                     borderColor: "blue.400",
                     boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
                   }}
-                  px="12px"
+                  onBlur={(e) => {
+                    let value = e.target.value.trim();
+                    
+                    if (value === '') {
+                      handleNumberChange("litros", 0);
+                      return;
+                    }
+                    
+                    const numericValue = parseFloat(
+                      value.replace(/\./g, '').replace(',', '.')
+                    ) || 0;
+                    
+                    handleNumberChange("litros", numericValue);
+                  }}
                 />
-                <NumberInputStepper>
-                  <NumberIncrementStepper
-                   border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                  <NumberDecrementStepper 
-                    border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                </NumberInputStepper>
-              </NumberInput>
+                </InputGroup>
             </FormControl>
           </GridItem>
 
