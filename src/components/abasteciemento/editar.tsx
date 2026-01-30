@@ -205,8 +205,8 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
     setIsSaving(true);
     try {
       const response = await fetch(
-        // `https://gestaofrota.onrender.com/api/abastecimentos/${formData.id}`,
-        `http://localhost:5000/api/abastecimentos/${formData.id}`,
+        `https://gestaofrota.onrender.com/api/abastecimentos/${formData.id}`,
+        // `http://localhost:5000/api/abastecimentos/${formData.id}`,
         {
           method: "PUT",
           headers: { 
