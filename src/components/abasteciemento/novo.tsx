@@ -34,6 +34,8 @@ interface Abastecimento {
   id: string;
   caminhaoId: string;
   data: string;
+  arlaLitro: number;
+  valorLitroArla: number,
   litros: number;
   valorLitro: number;
   valorTotal: number;
@@ -53,6 +55,8 @@ interface NovoAbastecimentoModalProps {
 const formDataInicial: Omit<Abastecimento, "id"> = {
   caminhaoId: "",
   data: new Date().toISOString().split('T')[0],
+  arlaLitro: 0,
+  valorLitroArla: 0,
   litros: 0,
   valorLitro: 0,
   valorTotal: 0,
@@ -97,11 +101,15 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
         [name]: numValue,
       };
 
-     
-      if (name === 'litros' || name === 'valorLitro') {
+      
+      if (name === 'litros' || name === 'valorLitro' || name === 'arlaLitro' || name === 'valorLitroArla') {
+        const arlaLitro = name ==='arlaLitro' ? numValue : prev.arlaLitro;
+        const valorLitroArla = name === 'valorLitroArla' ? numValue : prev.valorLitroArla;
         const litros = name === 'litros' ? numValue : prev.litros;
         const valorLitro = name === 'valorLitro' ? numValue : prev.valorLitro;
-        newData.valorTotal = litros * valorLitro;
+        const valorTotalArla = arlaLitro * valorLitroArla;
+        const valorTotalFuel = litros * valorLitro;
+        newData.valorTotal = valorTotalArla + valorTotalFuel;
       }
 
       return newData;
@@ -124,6 +132,28 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
       toast({
         title: "Erro",
         description: "Informe a data do abastecimento.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (formData.arlaLitro < 0) {
+      toast({
+        title: "Erro",
+        description: "Informe a quantidade de litros.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (formData.valorLitroArla < 0) {
+      toast({
+        title: "Erro",
+        description: "Informe o valor por litro.",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -188,7 +218,8 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
 
     setIsSaving(true);
     try {
-      const response = await fetch("https://gestaofrota.onrender.com/api/abastecimentos", {
+      // const response = await fetch("https://gestaofrota.onrender.com/api/abastecimentos", {
+         const response = await fetch("http://localhost:5000/api/abastecimentos", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -287,23 +318,47 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
               </Select>
             </FormControl>
           </GridItem>
-          
-          <GridItem colSpan={1}>
+
+           <GridItem colSpan={2}>
             <FormControl isRequired mb={2}>
-              <FormLabel fontSize="12px" fontWeight="600" color="#666666" >Data do Abastecimento</FormLabel>
-              <Input
-                name="data"
-                type="date"
-                value={formData.data}
-                onChange={handleChange}
-                 fontSize="13px"
-                border="1px solid #d0d0d0"
-                borderRadius="3px"
-                height="32px"
-                _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
-              />
+              <FormLabel fontSize="12px" fontWeight="600" color="#666666">Odômetro (km)</FormLabel>
+              <NumberInput
+                value={formData.odometro}
+                min={0}
+                step={1}
+                onChange={(value) => handleNumberChange("odometro", value)}
+              >
+                <NumberInputField
+                  inputMode="decimal"
+                  height="40px"
+                  fontSize="14px"
+                  borderRadius="6px"
+                  borderColor="gray.300"
+                  px="12px"
+                  _hover={{ borderColor: "gray.400" }}
+                  _focus={{
+                    borderColor: "blue.400",
+                    boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+                  }}
+                />
+
+                   <NumberInputStepper>
+                  <NumberIncrementStepper
+                    border="none"
+                    color="gray.500"
+                    _hover={{ color: "blue.500" }}
+                  />
+                  <NumberDecrementStepper
+                    border="none"
+                    color="gray.500"
+                    _hover={{ color: "blue.500" }}
+                  />
+                </NumberInputStepper>
+              </NumberInput>
             </FormControl>
-          </GridItem>
+        </GridItem>
+          
+          
           
 
           <GridItem colSpan={1}>
@@ -314,7 +369,7 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
                 color="gray.600"
                 mb="4px"
               >
-                Litros abastecidos
+                Litros de Combustivel
               </FormLabel>
            <InputGroup>
             <InputLeftElement
@@ -322,7 +377,7 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
                 height="40px"
                 fontSize="14px"
                 color="gray.500"
-                children="L"
+                children="Fuel"
               />
             <Input
                 key={`litros-${formData.litros}`} 
@@ -371,7 +426,7 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
                   color="gray.600"
                   mb="4px"
                 >
-                  Valor por Litro
+                  Valor por Litro 
                 </FormLabel>
 
                 <InputGroup>
@@ -419,6 +474,121 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
                 </InputGroup>
               </FormControl>
             </GridItem>
+
+             <GridItem colSpan={1}>
+            <FormControl isRequired>
+              <FormLabel
+                fontSize="12px"
+                fontWeight="500"
+                color="gray.600"
+                mb="4px"
+              >
+                Litros de Arla
+              </FormLabel>
+           <InputGroup>
+            <InputLeftElement
+                pointerEvents="none"
+                height="40px"
+                fontSize="14px"
+                color="gray.500"
+                children="Arla"
+              />
+            <Input
+                name = "arlaLitro"
+                key={`litros-${formData.arlaLitro}`} 
+                defaultValue={formData.arlaLitro > 0 ? 
+                  formData.arlaLitro.toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }) : ""}
+                placeholder="Quantidade abastecida"
+                height="40px"
+                fontSize="14px"
+                borderRadius="6px"
+                borderColor="gray.300"
+                pl="40px"
+                pr="12px"
+                _hover={{ borderColor: "gray.400" }}
+                _focus={{
+                  borderColor: "blue.400",
+                  boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+                }}
+                onBlur={(e) => {
+                  let value = e.target.value.trim();
+                  
+                  if (value === '') {
+                    handleNumberChange("arlaLitro", 0);
+                    return;
+                  }
+                  
+                  const numericValue = parseFloat(
+                    value.replace(/\./g, '').replace(',', '.')
+                  ) || 0;
+                  
+                  handleNumberChange("arlaLitro", numericValue);
+                }}
+              />
+              </InputGroup>
+            </FormControl>
+          </GridItem>
+
+
+        <GridItem colSpan={1}>
+              <FormControl isRequired>
+                <FormLabel
+                  fontSize="12px"
+                  fontWeight="500"
+                  color="gray.600"
+                  mb="4px"
+                >
+                  Valor por Litro
+                </FormLabel>
+
+                <InputGroup>
+                  <InputLeftElement
+                    pointerEvents="none"
+                    height="40px"
+                    fontSize="14px"
+                    color="gray.500"
+                    children="R$"
+                  />
+                  <Input
+                    key={`valor-${formData.valorLitroArla}`} 
+                    defaultValue={formData.valorLitroArla > 0 ? 
+                      formData.valorLitroArla.toLocaleString('pt-BR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }) : ""}
+                    placeholder="0,00"
+                    height="40px"
+                    fontSize="14px"
+                    borderRadius="6px"
+                    borderColor="gray.300"
+                    pl="40px"
+                    pr="12px"
+                    _hover={{ borderColor: "gray.400" }}
+                    _focus={{
+                      borderColor: "blue.400",
+                      boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+                    }}
+                    onBlur={(e) => {
+                      let value = e.target.value.trim();
+                      
+                      if (value === '') {
+                        handleNumberChange("valorLitroArla", 0);
+                        return;
+                      }
+                      
+                      const numericValue = parseFloat(
+                        value.replace(/\./g, '').replace(',', '.')
+                      ) || 0;
+                      
+                      handleNumberChange("valorLitroArla", numericValue);
+                    }}
+                  />
+                </InputGroup>
+              </FormControl>
+            </GridItem>
          
 
           <GridItem colSpan={1}>
@@ -440,45 +610,25 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
             </FormControl>
           </GridItem>
 
-          <GridItem colSpan={1}>
+         <GridItem colSpan={1}>
             <FormControl isRequired mb={2}>
-              <FormLabel fontSize="12px" fontWeight="600" color="#666666">Odômetro (km)</FormLabel>
-              <NumberInput
-                value={formData.odometro}
-                min={0}
-                step={1}
-                onChange={(value) => handleNumberChange("odometro", value)}
-              >
-                <NumberInputField
-                  inputMode="decimal"
-                  height="40px"
-                  fontSize="14px"
-                  borderRadius="6px"
-                  borderColor="gray.300"
-                  px="12px"
-                  _hover={{ borderColor: "gray.400" }}
-                  _focus={{
-                    borderColor: "blue.400",
-                    boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
-                  }}
-                />
-
-
-                <NumberInputStepper>
-                  <NumberIncrementStepper
-                    border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                  <NumberDecrementStepper
-                    border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                </NumberInputStepper>
-              </NumberInput>
+              <FormLabel fontSize="12px" fontWeight="600" color="#666666" >Data do Abastecimento</FormLabel>
+              <Input
+                name="data"
+                type="date"
+                value={formData.data}
+                onChange={handleChange}
+                 fontSize="13px"
+                border="1px solid #d0d0d0"
+                borderRadius="3px"
+                height="32px"
+                _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
+              />
             </FormControl>
-        </GridItem>
+          </GridItem>
+
+
+             
 
           <GridItem colSpan={1}>
             <FormControl isRequired mb={2}>

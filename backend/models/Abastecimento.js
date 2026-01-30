@@ -1,15 +1,24 @@
-// models/Abastecimento.js
 const mongoose = require("mongoose");
 
 const AbastecimentoSchema = new mongoose.Schema({
   caminhaoId: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: "Equipamentos",  // Alterado para Equipamentos
+    ref: "Equipamentos",  
     required: true 
   },
   data: { 
     type: String, 
     required: true 
+  },
+  arlaLitro : { 
+    type: Number, 
+    required: true,
+    min: 0
+  },
+   valorLitroArla: { 
+    type: Number, 
+    required: true,
+    min: 0
   },
   litros: { 
     type: Number, 
@@ -47,7 +56,9 @@ const AbastecimentoSchema = new mongoose.Schema({
 });
 
 AbastecimentoSchema.pre('save', function(next) {
-  this.valorTotal = this.litros * this.valorLitro;
+  const valorTotalArla = this.arlaLitro * this.valorLitroArla ;
+  const valorTotalFuel = this.litros * this.valorLitro;
+  this.valorTotal = valorTotalArla + valorTotalFuel;
   next();
 });
 

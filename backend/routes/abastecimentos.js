@@ -1,9 +1,9 @@
-// routes/abastecimentos.js
+
 const express = require("express");
 const router = express.Router();
 const Abastecimento = require("../models/Abastecimento");
 
-// Função para formatar documentos
+
 const formatDoc = (doc) => {
   if (!doc) return null;
   
@@ -19,11 +19,11 @@ const formatDoc = (doc) => {
   return obj;
 };
 
-// GET - listar todos os abastecimentos
+
 router.get("/", async (req, res) => {
   try {
     const abastecimentos = await Abastecimento.find()
-      .populate("caminhaoId")  // Agora vai funcionar com Equipamentos
+      .populate("caminhaoId")  
       .sort({ data: -1 });
     
     const abastecimentosFormatados = abastecimentos.map(abastecimento => formatDoc(abastecimento));
@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET - abastecimento por ID
+
 router.get("/:id", async (req, res) => {
   try {
     const abastecimento = await Abastecimento.findById(req.params.id)
@@ -64,6 +64,8 @@ router.post("/", async (req, res) => {
   let {
     caminhaoId,
     data,
+    arlaLitro,
+    valorLitroArla,
     litros,
     valorLitro,
     posto,
@@ -79,12 +81,14 @@ router.post("/", async (req, res) => {
 
   // Verificação dos campos obrigatórios
   if (!caminhaoId || !data || litros === undefined || valorLitro === undefined || 
-      !posto || odometro === undefined || !tipoCombustivel) {
+      !posto || odometro === undefined || !tipoCombustivel || arlaLitro === undefined || valorLitroArla === undefined) {
     return res.status(400).json({
       error: "Campos obrigatórios ausentes.",
       camposFaltantes: {
         caminhaoId: !caminhaoId,
         data: !data,
+        arlaLitro: arlaLitro === undefined,
+        valorLitroArla: valorLitroArla === undefined,
         litros: litros === undefined,
         valorLitro: valorLitro === undefined,
         posto: !posto,
@@ -96,11 +100,15 @@ router.post("/", async (req, res) => {
 
   try {
     // Calcular valor total
-    const valorTotal = Number(litros) * Number(valorLitro);
+    const valorTotalArla = Number(arlaLitro) * Number(valorLitroArla)
+    const valorTotalFuel = Number(litros) * Number(valorLitro);
+    const valorTotal = valorTotalArla + valorTotalFuel;
 
     const novoAbastecimento = new Abastecimento({
       caminhaoId,
       data,
+      arlaLitro: Number(arlaLitro) ,
+      valorLitroArla: Number(valorLitroArla),
       litros: Number(litros),
       valorLitro: Number(valorLitro),
       posto,
@@ -137,6 +145,12 @@ router.put("/:id", async (req, res) => {
     }
     
     // Converter números
+    if(dadosAtualizados.valorLitroArla !== undefined){
+      dadosAtualizados.valorLitroArla = Number(dadosAtualizados.valorLitroArla);
+    }
+    if(dadosAtualizados.arlaLitro !== undefined){
+      dadosAtualizados.arlaLitro = Number(dadosAtualizados.arlaLitro);
+    }
     if (dadosAtualizados.litros !== undefined) {
       dadosAtualizados.litros = Number(dadosAtualizados.litros);
     }
@@ -150,9 +164,13 @@ router.put("/:id", async (req, res) => {
     // Calcular valor total se litros ou valorLitro foram alterados
     if (dadosAtualizados.litros !== undefined || dadosAtualizados.valorLitro !== undefined) {
       const abastecimentoAtual = await Abastecimento.findById(req.params.id);
+      const arlaLitro = dadosAtualizados.arlaLitro !== undefined ? dadosAtualizados.arlaLitro : abastecimentoAtual.arlaLitro;
+      const valorLitroArla = dadosAtualizados.valorLitroArla !== undefined ? dadosAtualizados.valorLitroArla : abastecimentoAtual.valorLitroArla;
       const litros = dadosAtualizados.litros !== undefined ? dadosAtualizados.litros : abastecimentoAtual.litros;
       const valorLitro = dadosAtualizados.valorLitro !== undefined ? dadosAtualizados.valorLitro : abastecimentoAtual.valorLitro;
-      dadosAtualizados.valorTotal = litros * valorLitro;
+      const valorTotalArla = arlaLitro * valorLitroArla;
+      const valorTotalFuel = litros * valorLitro;
+      dadosAtualizados.valorTotal = valorTotalFuel + valorTotalArla ;
     }
     
     const abastecimentoAtualizado = await Abastecimento.findByIdAndUpdate(

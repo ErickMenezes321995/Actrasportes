@@ -34,6 +34,8 @@ interface Abastecimento {
   id: string;
   caminhaoId: string;
   data: string;
+  arlaLitro: number;
+  valorLitroArla: number,
   litros: number;
   valorLitro: number;
   valorTotal: number;
@@ -86,10 +88,14 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
       };
 
      
-      if (name === 'litros' || name === 'valorLitro') {
+       if (name === 'litros' || name === 'valorLitro' || name === 'arlaLitro' || name === 'valorLitroArla') {
+        const arlaLitro = name ==='arlaLitro' ? numValue : prev.arlaLitro;
+        const valorLitroArla = name === 'valorLitroArla' ? numValue : prev.valorLitroArla;
         const litros = name === 'litros' ? numValue : prev.litros;
         const valorLitro = name === 'valorLitro' ? numValue : prev.valorLitro;
-        newData.valorTotal = litros * valorLitro;
+        const valorTotalArla = arlaLitro * valorLitroArla;
+        const valorTotalFuel = litros * valorLitro;
+        newData.valorTotal = valorTotalArla + valorTotalFuel;
       }
 
       return newData;
@@ -112,6 +118,28 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
       toast({
         title: "Erro",
         description: "Informe a data do abastecimento.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (formData.arlaLitro < 0) {
+      toast({
+        title: "Erro",
+        description: "Informe a quantidade de litros.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (formData.valorLitroArla < 0) {
+      toast({
+        title: "Erro",
+        description: "Informe o valor por litro.",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -177,7 +205,8 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
     setIsSaving(true);
     try {
       const response = await fetch(
-        `https://gestaofrota.onrender.com/api/abastecimentos/${formData.id}`,
+        // `https://gestaofrota.onrender.com/api/abastecimentos/${formData.id}`,
+        `http://localhost:5000/api/abastecimentos/${formData.id}`,
         {
           method: "PUT",
           headers: { 
@@ -282,24 +311,44 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
             </FormControl>
           </GridItem>
 
-          <GridItem colSpan={1}>
+          <GridItem colSpan={2}>
             <FormControl isRequired mb={2}>
-              <FormLabel 
+              <FormLabel
               fontSize="12px"
               fontWeight="bold"
               color="#666666"
-              >Data do Abastecimento</FormLabel>
-              <Input
-                name="data"
-                type="date"
-                value={formData.data}
-                onChange={handleChange}
-                fontSize="13px"
-                border="1px solid #d0d0d0"
-                borderRadius="3px"
-                height="32px"
-                _focus={{borderColor:"#abde3", boxShadow:"0 0 0 1px #a3bde3"}}
-              />
+              >Odômetro (km)</FormLabel>
+              <NumberInput
+                value={formData.odometro}
+                min={0}
+                step={1}
+                onChange={(value) => handleNumberChange("odometro", value)}
+              >
+                <NumberInputField
+                 height="40px"
+                  fontSize="14px"
+                  borderRadius="6px"
+                  borderColor="gray.300"
+                  _hover={{ borderColor: "gray.400" }}
+                  _focus={{
+                    borderColor: "blue.400",
+                    boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+                  }}
+                  px="12px"
+                />
+                <NumberInputStepper>
+                  <NumberIncrementStepper 
+                  border="none"
+                    color="gray.500"
+                    _hover={{ color: "blue.500" }}
+                  />
+                  <NumberDecrementStepper 
+                  border="none"
+                    color="gray.500"
+                    _hover={{ color: "blue.500" }}
+                  />
+                </NumberInputStepper>
+              </NumberInput>
             </FormControl>
           </GridItem>
           
@@ -310,14 +359,14 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
               fontSize="12px"
               fontWeight="bold"
               color="#666666"
-              >Litros Abastecidos</FormLabel>
+              > Litros de Combustivel</FormLabel>
               <InputGroup>
               <InputLeftElement
                   pointerEvents="none"
                   height="40px"
                   fontSize="14px"
                   color="gray.500"
-                  children="L"
+                  children="Fuel"
                 />
               <Input
                   key={`litros-${formData.litros}`} 
@@ -415,6 +464,121 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
                </InputGroup>
              </FormControl>
            </GridItem>
+
+        <GridItem colSpan={1}>
+          <FormControl isRequired>
+            <FormLabel
+              fontSize="12px"
+              fontWeight="500"
+              color="gray.600"
+              mb="4px"
+            >
+              Litros de Arla
+            </FormLabel>
+        <InputGroup>
+          <InputLeftElement
+              pointerEvents="none"
+              height="40px"
+              fontSize="14px"
+              color="gray.500"
+              children="Arla"
+            />
+          <Input
+              name = "arlaLitro"
+              key={`litros-${formData.arlaLitro}`} 
+              defaultValue={formData.arlaLitro > 0 ? 
+                formData.arlaLitro.toLocaleString('pt-BR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                }) : ""}
+              placeholder="Quantidade abastecida"
+              height="40px"
+              fontSize="14px"
+              borderRadius="6px"
+              borderColor="gray.300"
+              pl="40px"
+              pr="12px"
+              _hover={{ borderColor: "gray.400" }}
+              _focus={{
+                borderColor: "blue.400",
+                boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+              }}
+              onBlur={(e) => {
+                let value = e.target.value.trim();
+                
+                if (value === '') {
+                  handleNumberChange("arlaLitro", 0);
+                  return;
+                }
+                
+                const numericValue = parseFloat(
+                  value.replace(/\./g, '').replace(',', '.')
+                ) || 0;
+                
+                handleNumberChange("arlaLitro", numericValue);
+              }}
+            />
+            </InputGroup>
+          </FormControl>
+        </GridItem>
+
+
+      <GridItem colSpan={1}>
+            <FormControl isRequired>
+              <FormLabel
+                fontSize="12px"
+                fontWeight="500"
+                color="gray.600"
+                mb="4px"
+              >
+                Valor por Litro
+              </FormLabel>
+
+              <InputGroup>
+                <InputLeftElement
+                  pointerEvents="none"
+                  height="40px"
+                  fontSize="14px"
+                  color="gray.500"
+                  children="R$"
+                />
+                <Input
+                  key={`valor-${formData.valorLitroArla}`} 
+                  defaultValue={formData.valorLitroArla > 0 ? 
+                    formData.valorLitroArla.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    }) : ""}
+                  placeholder="0,00"
+                  height="40px"
+                  fontSize="14px"
+                  borderRadius="6px"
+                  borderColor="gray.300"
+                  pl="40px"
+                  pr="12px"
+                  _hover={{ borderColor: "gray.400" }}
+                  _focus={{
+                    borderColor: "blue.400",
+                    boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
+                  }}
+                  onBlur={(e) => {
+                    let value = e.target.value.trim();
+                    
+                    if (value === '') {
+                      handleNumberChange("valorLitroArla", 0);
+                      return;
+                    }
+                    
+                    const numericValue = parseFloat(
+                      value.replace(/\./g, '').replace(',', '.')
+                    ) || 0;
+                    
+                    handleNumberChange("valorLitroArla", numericValue);
+                  }}
+                />
+              </InputGroup>
+            </FormControl>
+          </GridItem>
         
 
           <GridItem colSpan={1}>
@@ -439,47 +603,29 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
               />
             </FormControl>
            </GridItem>
-           
+
            <GridItem colSpan={1}>
             <FormControl isRequired mb={2}>
-              <FormLabel
+              <FormLabel 
               fontSize="12px"
               fontWeight="bold"
               color="#666666"
-              >Odômetro (km)</FormLabel>
-              <NumberInput
-                value={formData.odometro}
-                min={0}
-                step={1}
-                onChange={(value) => handleNumberChange("odometro", value)}
-              >
-                <NumberInputField
-                 height="40px"
-                  fontSize="14px"
-                  borderRadius="6px"
-                  borderColor="gray.300"
-                  _hover={{ borderColor: "gray.400" }}
-                  _focus={{
-                    borderColor: "blue.400",
-                    boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)",
-                  }}
-                  px="12px"
-                />
-                <NumberInputStepper>
-                  <NumberIncrementStepper 
-                  border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                  <NumberDecrementStepper 
-                  border="none"
-                    color="gray.500"
-                    _hover={{ color: "blue.500" }}
-                  />
-                </NumberInputStepper>
-              </NumberInput>
+              >Data do Abastecimento</FormLabel>
+              <Input
+                name="data"
+                type="date"
+                value={formData.data}
+                onChange={handleChange}
+                fontSize="13px"
+                border="1px solid #d0d0d0"
+                borderRadius="3px"
+                height="32px"
+                _focus={{borderColor:"#abde3", boxShadow:"0 0 0 1px #a3bde3"}}
+              />
             </FormControl>
           </GridItem>
+           
+           
          
           <GridItem colSpan={1}>
             <FormControl isRequired mb={2}>
