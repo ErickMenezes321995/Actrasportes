@@ -218,8 +218,8 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
 
     setIsSaving(true);
     try {
-      // const response = await fetch("https://gestaofrota.onrender.com/api/abastecimentos", {
-         const response = await fetch("http://localhost:5000/api/abastecimentos", {
+      const response = await fetch("https://gestaofrota.onrender.com/api/abastecimentos", {
+        //  const response = await fetch("http://localhost:5000/api/abastecimentos", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -357,9 +357,7 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
               </NumberInput>
             </FormControl>
         </GridItem>
-          
-          
-          
+                  
 
           <GridItem colSpan={1}>
             <FormControl isRequired>
