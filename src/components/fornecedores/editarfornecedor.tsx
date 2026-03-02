@@ -63,7 +63,7 @@ const EditarFornecedorModal: React.FC<EditarFornecedorModalProps> = ({
   const handleSubmit = async () => {
     try {
       const response = await fetch(
-        `https://gestaofrota.onrender.com/api/fornecedores/${formData.id}`,
+        `https://backend-frotas.onrender.com/api/fornecedores/${formData.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

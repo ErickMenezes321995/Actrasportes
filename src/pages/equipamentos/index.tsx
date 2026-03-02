@@ -120,7 +120,7 @@ const GestaoCaminhoes: React.FC = () => {
     const fetchCaminhoes = async () => {
       try {
         setIsLoading(true); 
-        const response = await axios.get<Caminhao[]>("https://gestaofrota.onrender.com/api/caminhoes");
+        const response = await axios.get<Caminhao[]>("https://backend-frotas.onrender.com/api/caminhoes");
         
         const dataNormalizada = response.data.map((caminhao: any) => ({
           ...caminhao,
@@ -145,7 +145,7 @@ const GestaoCaminhoes: React.FC = () => {
 
   const deletarCaminhao = async (id: number) => {
     try {
-      await axios.delete(`https://gestaofrota.onrender.com/api/caminhoes/${id}`);
+      await axios.delete(`https://backend-frotas.onrender.com/api/caminhoes/${id}`);
       
       const caminhaoRemovido = caminhoes.find((c) => c.id === id);
       

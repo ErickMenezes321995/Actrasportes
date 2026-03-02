@@ -93,7 +93,7 @@ const NovoFornecedorModal: React.FC<NovoFornecedorModalProps> = ({
           .map((item) => item.trim()),
       };
 
-      const response = await fetch("https://gestaofrota.onrender.com/api/fornecedores", {
+      const response = await fetch("https://backend-frotas.onrender.com/api/fornecedores", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fornecedorData),

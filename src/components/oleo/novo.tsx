@@ -102,7 +102,7 @@ const NovoOleoModal: React.FC<NovoOleoModalProps> = ({
 
     setIsSaving(true);
     try {
-      const response = await fetch("https://gestaofrota.onrender.com/api/trocaOleo", {
+      const response = await fetch("https://backend-frotas.onrender.com/api/trocaOleo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

@@ -218,7 +218,7 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
 
     setIsSaving(true);
     try {
-      const response = await fetch("https://gestaofrota.onrender.com/api/abastecimentos", {
+      const response = await fetch("https://backend-frotas.onrender.com/api/abastecimentos", {
         //  const response = await fetch("http://localhost:5000/api/abastecimentos", {
         method: "POST",
         headers: { 

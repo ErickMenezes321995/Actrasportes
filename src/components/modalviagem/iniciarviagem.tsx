@@ -55,7 +55,7 @@ const SelecionarMotoristaEquipamentoModal: React.FC<SelecionarMotoristaEquipamen
   useEffect(() => {
     if (!isOpen) return;
 
-     fetch("https://gestaofrota.onrender.com/api/motoristas")
+     fetch("https://backend-frotas.onrender.com/api/motoristas")
       .then((res) => res.json())
       .then((data) => setListaMotoristas(data))
       .catch(() =>
@@ -67,7 +67,7 @@ const SelecionarMotoristaEquipamentoModal: React.FC<SelecionarMotoristaEquipamen
         })
       );
 
-   fetch("https://gestaofrota.onrender.com/api/caminhoes")
+   fetch("https://backend-frotas.onrender.com/api/caminhoes")
   .then(res => res.json())
   .then(data => setListaEquipamentos(data))
   .catch(() => {
@@ -98,7 +98,7 @@ const SelecionarMotoristaEquipamentoModal: React.FC<SelecionarMotoristaEquipamen
     return;
   }
 
-  fetch(`https://gestaofrota.onrender.com/api/caminhoes/${equipamentoSelecionado.id}`, {
+  fetch(`https://backend-frotas.onrender.com/api/caminhoes/${equipamentoSelecionado.id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

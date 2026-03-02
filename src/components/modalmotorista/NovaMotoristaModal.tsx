@@ -65,7 +65,7 @@ const NovaMotoristaModal: React.FC<NovaMotoristaModalProps> = ({ onSalvar }) => 
   const handleSalvar = async () => {
     setIsSaving(true);
     try {
-      await axios.post("https://gestaofrota.onrender.com/api/motoristas", formData);
+      await axios.post("https://backend-frotas.onrender.com/api/motoristas", formData);
 
       toast({
         title: "Motorista cadastrado com sucesso.",

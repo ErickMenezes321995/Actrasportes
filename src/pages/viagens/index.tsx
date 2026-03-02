@@ -265,7 +265,7 @@ const GestaoViagens: React.FC = () => {
           setIsLoading(false);
         }, 20000);
 
-        const res = await axios.get<Viagem[]>("https://gestaofrota.onrender.com/api/viagens");
+        const res = await axios.get<Viagem[]>("https://backend-frotas.onrender.com/api/viagens");
         
         clearTimeout(timeout);
         setViagens(res.data);
@@ -315,7 +315,7 @@ const GestaoViagens: React.FC = () => {
     if (!viagemSelecionada) return;
 
     try {
-      const res = await axios.put(`https://gestaofrota.onrender.com/api/viagens/${viagemSelecionada.id}`, {
+      const res = await axios.put(`https://backend-frotas.onrender.com/api/viagens/${viagemSelecionada.id}`, {
         motorista,
         viatura,
         dataInicio,
@@ -348,7 +348,7 @@ const GestaoViagens: React.FC = () => {
 
   const deletarViagem = async (id: number) => {
     try {
-      await axios.delete(`https://gestaofrota.onrender.com/api/viagens/${id}`);
+      await axios.delete(`https://backend-frotas.onrender.com/api/viagens/${id}`);
       setViagens((old): Viagem[] => old.filter((v) => v.id !== id));
       toast({
         title: "Viagem excluída.",
@@ -403,7 +403,7 @@ const GestaoViagens: React.FC = () => {
               triggerText="Nova Viagem"
               onSalvar={async (novaViagem) => {
                 try {
-                  const res = await axios.post("https://gestaofrota.onrender.com/api/viagens", {
+                  const res = await axios.post("https://backend-frotas.onrender.com/api/viagens", {
                     ...novaViagem,
                     status: "Pendente",
                     transacoes: [],
@@ -578,7 +578,7 @@ const GestaoViagens: React.FC = () => {
           viagem={viagemParaEditar}
           onSalvar={async (dadosEditados) => {
             try {
-              const res = await axios.put(`https://gestaofrota.onrender.com/api/viagens/${dadosEditados.id}`, dadosEditados);
+              const res = await axios.put(`https://backend-frotas.onrender.com/api/viagens/${dadosEditados.id}`, dadosEditados);
               setViagens((old): Viagem[] =>
                 old.map((v) => (v.id === dadosEditados.id ? res.data as Viagem : v))
               );

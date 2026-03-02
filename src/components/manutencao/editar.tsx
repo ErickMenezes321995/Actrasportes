@@ -168,7 +168,7 @@ const EditarManutencaoModal: React.FC<EditarManutencaoModalProps> = ({
     setIsSaving(true);
     try {
       const response = await fetch(
-        `https://gestaofrota.onrender.com/api/manuPrev/${formData.id}`,
+        `https://backend-frotas.onrender.com/api/manuPrev/${formData.id}`,
         {
           method: "PUT",
           headers: { 

@@ -67,7 +67,7 @@ const EditarClienteModal: React.FC<EditarClienteModalProps> = ({
     
     try {
       const response = await fetch(
-        `https://gestaofrota.onrender.com/api/clientes/${formData.id}`,
+        `https://backend-frotas.onrender.com/api/clientes/${formData.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

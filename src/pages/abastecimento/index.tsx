@@ -80,8 +80,8 @@ const GestaoCombustiveis: React.FC = () => {
 
     try {
       const [abastecimentosResponse, caminhoesResponse] = await Promise.all([
-        fetch("https://gestaofrota.onrender.com/api/abastecimentos"),
-        fetch("https://gestaofrota.onrender.com/api/caminhoes")
+        fetch("https://backend-frotas.onrender.com/api/abastecimentos"),
+        fetch("https://backend-frotas.onrender.com/api/caminhoes")
       ]);
 
       if (!abastecimentosResponse.ok) throw new Error("Erro na requisição de abastecimentos");
@@ -114,7 +114,7 @@ const GestaoCombustiveis: React.FC = () => {
 
   const deletarAbastecimento = async (id: string) => {
     try {
-      const response = await fetch(`https://gestaofrota.onrender.com/api/abastecimentos/${id}`, {
+      const response = await fetch(`https://backend-frotas.onrender.com/api/abastecimentos/${id}`, {
         method: "DELETE",
       });
 

@@ -159,7 +159,7 @@ const NovoManutencaoModal: React.FC<NovoManutencaoModalProps> = ({
     setIsSaving(true);
     try {
       const response = await fetch(
-        "https://gestaofrota.onrender.com/api/manuPrev",
+        "https://backend-frotas.onrender.com/api/manuPrev",
         {
           method: "POST",
           headers: { 

@@ -93,7 +93,6 @@ const Sidebar = ({ children }: SidebarProps) => {
 
   useEffect(() => {
     const loadUserData = () => {
-      // Verificar se há um usuário autenticado
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
           try {
@@ -159,7 +158,6 @@ const Sidebar = ({ children }: SidebarProps) => {
 
     window.addEventListener('storage', handleStorageChange);
     
-    // Verificar a cada 5 segundos se os dados mudaram (para mesma aba)
     const interval = setInterval(() => {
       const usuarioLogadoStr = localStorage.getItem("usuarioLogado");
       if (usuarioLogadoStr) {
@@ -196,7 +194,6 @@ const Sidebar = ({ children }: SidebarProps) => {
   };
 
   const handleLogout = () => {
-    // Limpar dados de autenticação e localStorage
     auth.signOut().then(() => {
       localStorage.removeItem("usuarioLogado");
       window.location.href = "/";
@@ -455,8 +452,8 @@ const Sidebar = ({ children }: SidebarProps) => {
 
         <HStack spacing={4}>
           <Image
-            src="/assets/tr.png"
-            alt="Latino Transportadora"
+             src="/assets/actransporte.png"
+            alt="Logo da empresa"
             height="45px"
             objectFit="contain"
           />

@@ -114,7 +114,7 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
         return;
       }
 
-      const response = await fetch("https://gestaofrota.onrender.com/api/caminhoes", {
+      const response = await fetch("https://backend-frotas.onrender.com/api/caminhoes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

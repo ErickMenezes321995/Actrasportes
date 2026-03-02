@@ -66,7 +66,7 @@ const EditarMotoristaModal: React.FC<EditarMotoristaModalProps> = ({
     setIsSaving(true);
     try {
       const response = await axios.put<Motorista>(
-        `https://gestaofrota.onrender.com/api/motoristas/${formData.id}`,
+        `https://backend-frotas.onrender.com/api/motoristas/${formData.id}`,
         formData
       );
       onSalvar(response.data);

@@ -138,7 +138,7 @@ const GestaoManutencaoPreventiva: React.FC = () => {
   const carregarDados = useCallback(async () => {
     setIsLoading(true);
     try {
-      const resManutencoes = await fetch("https://gestaofrota.onrender.com/api/manuPrev");
+      const resManutencoes = await fetch("https://backend-frotas.onrender.com/api/manuPrev");
       if (!resManutencoes.ok) throw new Error("Erro ao buscar manutenções");
       const dadosManutencoes: ManutencaoPreventiva[] = await resManutencoes.json();
 
@@ -151,7 +151,7 @@ const GestaoManutencaoPreventiva: React.FC = () => {
 
       setManutencoes(dadosManutencoes);
 
-      const resCaminhoes = await fetch("https://gestaofrota.onrender.com/api/caminhoes");
+      const resCaminhoes = await fetch("https://backend-frotas.onrender.com/api/caminhoes");
       if (!resCaminhoes.ok) throw new Error("Erro ao buscar caminhões");
       const dadosCaminhoes: Caminhao[] = await resCaminhoes.json();
       
@@ -184,7 +184,7 @@ const GestaoManutencaoPreventiva: React.FC = () => {
 
   const deletarManutencao = async (id: string) => {
     try {
-      const response = await fetch(`https://gestaofrota.onrender.com/api/manuPrev/${id}`, {
+      const response = await fetch(`https://backend-frotas.onrender.com/api/manuPrev/${id}`, {
         method: "DELETE",
       });
 

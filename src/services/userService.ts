@@ -27,7 +27,7 @@ export interface Usuario {
 
 export const getUserById = async (userId: string): Promise<Usuario | null> => {
   try {
-    const userDoc = await getDoc(doc(db, "usuarios", userId));
+    const userDoc = await getDoc(doc(db, "users", userId));
     if (userDoc.exists()) {
       return { id: userDoc.id, ...userDoc.data() } as Usuario;
     }
@@ -40,7 +40,7 @@ export const getUserById = async (userId: string): Promise<Usuario | null> => {
 
 export const getUserByEmail = async (email: string): Promise<Usuario | null> => {
   try {
-    const q = query(collection(db, "usuarios"), where("email", "==", email));
+    const q = query(collection(db, "users"), where("email", "==", email));
     const querySnapshot = await getDocs(q);
     
     if (!querySnapshot.empty) {
@@ -56,7 +56,7 @@ export const getUserByEmail = async (email: string): Promise<Usuario | null> => 
 
 export const createUser = async (userData: Omit<Usuario, "id">): Promise<string | null> => {
   try {
-    const docRef = doc(collection(db, "usuarios"));
+    const docRef = doc(collection(db, "users"));
     await setDoc(docRef, {
       ...userData,
       createdAt: new Date(),
@@ -71,7 +71,7 @@ export const createUser = async (userData: Omit<Usuario, "id">): Promise<string 
 
 export const updateUser = async (userId: string, userData: Partial<Usuario>): Promise<boolean> => {
   try {
-    await updateDoc(doc(db, "usuarios", userId), {
+    await updateDoc(doc(db, "users", userId), {
       ...userData,
       updatedAt: new Date()
     });

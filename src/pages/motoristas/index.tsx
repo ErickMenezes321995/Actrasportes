@@ -84,7 +84,7 @@ const GestaoMotoristas: React.FC = () => {
   const fetchMotoristas = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get<Motorista[]>("https://gestaofrota.onrender.com/api/motoristas");
+      const res = await axios.get<Motorista[]>("https://backend-frotas.onrender.com/api/motoristas");
       setMotoristas(res.data);
     } catch (error) {
       toast({
@@ -104,7 +104,7 @@ const GestaoMotoristas: React.FC = () => {
 
   const deletarMotorista = async (id: number) => {
     try {
-      await axios.delete(`https://gestaofrota.onrender.com/api/motoristas/${id}`);
+      await axios.delete(`https://backend-frotas.onrender.com/api/motoristas/${id}`);
       setMotoristas((prev) => prev.filter((m) => m.id !== id));
       toast({
         title: "Motorista removido",

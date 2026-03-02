@@ -69,7 +69,7 @@ const EditarPneuModal: React.FC<EditarPneuModalProps> = ({
   const handleSubmit = async () => {
     try {
       const response = await fetch(
-        `https://gestaofrota.onrender.com/api/trocaPneus/${formData.id}`,
+        `https://backend-frotas.onrender.com/api/trocaPneus/${formData.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

@@ -118,7 +118,7 @@ const NovoPneuModal: React.FC<NovoPneuModalProps> = ({
     setIsSaving(true);
     try {
       
-      const response = await fetch("https://gestaofrota.onrender.com/api/trocaPneus", {
+      const response = await fetch("https://backend-frotas.onrender.com/api/trocaPneus", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

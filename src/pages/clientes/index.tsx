@@ -107,7 +107,7 @@ const GestaoClientes: React.FC = () => {
   useEffect(() => {
     setIsLoading(true);
 
-    fetch("https://gestaofrota.onrender.com/api/clientes")
+    fetch("https://backend-frotas.onrender.com/api/clientes")
       .then((res) => {
         if (!res.ok) throw new Error("Erro ao carregar os dados do cliente");
         return res.json();
@@ -130,7 +130,7 @@ const GestaoClientes: React.FC = () => {
 
   const adicionarCliente = async () => {
     try {
-      const response = await fetch("https://gestaofrota.onrender.com/api/clientes");
+      const response = await fetch("https://backend-frotas.onrender.com/api/clientes");
       if (!response.ok) throw new Error("Erro ao buscar clientes");
       const data = await response.json();
       setClientes(data);
@@ -141,7 +141,7 @@ const GestaoClientes: React.FC = () => {
 
   const deletarCliente = async (id: number) => {
     try {
-      const response = await fetch(`https://gestaofrota.onrender.com/api/clientes/${id}`, {
+      const response = await fetch(`https://backend-frotas.onrender.com/api/clientes/${id}`, {
         method: "DELETE",
       });
 

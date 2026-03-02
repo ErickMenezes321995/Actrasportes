@@ -90,7 +90,7 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
       };
 
       const response = await fetch(
-        "https://gestaofrota.onrender.com/api/clientes",
+        "https://backend-frotas.onrender.com/api/clientes",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

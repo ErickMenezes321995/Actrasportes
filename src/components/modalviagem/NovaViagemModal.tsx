@@ -77,7 +77,7 @@ const NovaViagemModal: React.FC<NovaViagemModalProps> = ({
   useEffect(() => {
     // Buscar clientes ao abrir o modal
     if (isOpen) {
-      fetch("https://gestaofrota.onrender.com/api/clientes")
+      fetch("https://backend-frotas.onrender.com/api/clientes")
         .then((res) => res.json())
         .then((data) => setClientes(data))
         .catch((err) => console.error("Erro ao buscar clientes:", err));

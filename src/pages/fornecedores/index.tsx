@@ -100,7 +100,7 @@ const GestaoFornecedores: React.FC = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch("https://gestaofrota.onrender.com/api/fornecedores")
+    fetch("https://backend-frotas.onrender.com/api/fornecedores")
       .then((res) => {
         if (!res.ok) throw new Error("Erro na requisição");
         return res.json();
@@ -126,7 +126,7 @@ const GestaoFornecedores: React.FC = () => {
   const deletarFornecedor = (id: number) => {
     const fornecedorRemovido = fornecedores.find((f) => f.id === id);
 
-    fetch(`https://gestaofrota.onrender.com/api/fornecedores/${id}`, {
+    fetch(`https://backend-frotas.onrender.com/api/fornecedores/${id}`, {
       method: "DELETE",
     })
       .then((res) => {

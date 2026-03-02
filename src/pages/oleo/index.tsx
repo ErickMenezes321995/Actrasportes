@@ -70,8 +70,8 @@ const GestaoTrocaOleo: React.FC = () => {
 
       try {
         const [responseOleos, responseCaminhoes] = await Promise.all([
-          fetch("https://gestaofrota.onrender.com/api/trocaOleo"),
-          fetch("https://gestaofrota.onrender.com/api/caminhoes")
+          fetch("https://backend-frotas.onrender.com/api/trocaOleo"),
+          fetch("https://backend-frotas.onrender.com/api/caminhoes")
         ]);
 
         if (!responseOleos.ok) throw new Error("Erro ao buscar dados de trocas de óleo");
@@ -117,7 +117,7 @@ const GestaoTrocaOleo: React.FC = () => {
 
   const deletarOleo = async (id: string) => {
     try {
-      const response = await fetch(`https://gestaofrota.onrender.com/api/trocaOleo/${id}`, {
+      const response = await fetch(`https://backend-frotas.onrender.com/api/trocaOleo/${id}`, {
         method: "DELETE",
       });
 

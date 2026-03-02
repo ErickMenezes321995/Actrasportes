@@ -100,7 +100,7 @@ const EditarCaminhaoModal: React.FC<EditarCaminhaoModalProps> = ({
     setIsSaving(true);
     try {
       const response = await fetch(
-        `https://gestaofrota.onrender.com/api/caminhoes/${formData.id}`,
+        `https://backend-frotas.onrender.com/api/caminhoes/${formData.id}`,
         {
           method: "PUT",
           headers: {
