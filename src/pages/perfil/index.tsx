@@ -168,7 +168,7 @@ const Perfil: React.FC = () => {
     });
   }, [toast]);
 
-  // ✅ showSuccess com useCallback
+  
   const showSuccess = useCallback((message: string) => {
     toast({
       title: "Sucesso",
@@ -180,7 +180,7 @@ const Perfil: React.FC = () => {
     });
   }, [toast]);
 
-  // ✅ loadUserData com useCallback
+
   const loadUserData = useCallback(async (uid: string) => {
     try {
       const userDoc = await getDoc(doc(db, "users", uid));
@@ -198,7 +198,7 @@ const Perfil: React.FC = () => {
     }
   }, [showError]);
 
-  // ✅ useEffect corrigido
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -230,13 +230,12 @@ const Perfil: React.FC = () => {
   };
 
 const handleSave = async () => {
-  // 🔍 DEBUG - Verifique se os dados estão presentes
+
   console.log("🔄 Iniciando atualização do perfil...");
   console.log("user:", user);
   console.log("user.uid:", user?.uid);
   console.log("editUser:", editUser);
 
-  // ✅ Verificação robusta antes de prosseguir
   if (!user || !user.uid || typeof user.uid !== 'string' || user.uid.length < 5) {
     console.error("❌ user ou user.uid inválido:", user);
     showError("Dados do usuário incompletos. Faça login novamente.");
@@ -254,12 +253,11 @@ const handleSave = async () => {
   setLoading(true);
   
   try {
-    // ✅ Forma mais segura de criar a referência
+
     console.log("📝 Tentando atualizar documento para UID:", user.uid);
     
     const userRef = doc(db, "users", user.uid);
     
-    // ✅ Dados para atualização (garantindo que não há undefined)
     const updateData = {
       nome: editUser.nome || "",
       email: editUser.email || "",
@@ -277,7 +275,6 @@ const handleSave = async () => {
     
     await updateDoc(userRef, updateData);
     
-    // ✅ Atualizar estado local
     const updatedUser = { 
       ...user, 
       ...updateData,
@@ -430,7 +427,7 @@ const handleSave = async () => {
                   </Heading>
                   <Text color="#666">{user.email}</Text>
                   <HStack mt={2} spacing={2}>
-                    <Badge colorScheme={getStatusColor(user.status)}>{user.status}</Badge>
+                    {/* <Badge colorScheme={getStatusColor(user.status)}>{user.status}</Badge> */}
                     <Badge colorScheme={getTipoColor(user.tipo)}>{user.tipo}</Badge>
                   </HStack>
                 </Box>
@@ -635,7 +632,7 @@ const handleSave = async () => {
                   />
                 </FormControl>
                 
-                <FormControl>
+                {/* <FormControl>
                   <FormLabel>Status</FormLabel>
                   <Select
                     variant="extjs"
@@ -647,7 +644,7 @@ const handleSave = async () => {
                     <option value="inativo">Inativo</option>
                     <option value="pendente">Pendente</option>
                   </Select>
-                </FormControl>
+                </FormControl> */}
                 
                 <FormControl>
                   <FormLabel>Tipo de Usuário</FormLabel>

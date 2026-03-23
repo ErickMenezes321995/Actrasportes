@@ -205,7 +205,7 @@ const Sidebar = ({ children }: SidebarProps) => {
   };
 
   const navItems: NavItem[] = [
-    { label: "Viagens", href: "/", icon: MdLocationOn },
+    { label: "Viagens", href: "/Viagens", icon: MdLocationOn },
     { label: "Fornecedores", href: "/fornecedores", icon: MdLocalShipping },
     { label: "Clientes", href: "/clientes", icon: MdPeople },
     {
@@ -438,7 +438,9 @@ const Sidebar = ({ children }: SidebarProps) => {
       borderBottom="1px"
       borderColor={borderColor}
     >
-      <Flex align="center" gap={4}>
+      <Flex   
+      
+       align="center" gap={4}>
         <IconButton
           display={{ base: "flex", md: "none" }}
           onClick={onOpen}
@@ -452,7 +454,7 @@ const Sidebar = ({ children }: SidebarProps) => {
 
         <HStack spacing={4}>
           <Image
-             src="/assets/actransporte.png"
+            //  src="/assets/actransporte.png"
             alt="Logo da empresa"
             height="45px"
             objectFit="contain"
