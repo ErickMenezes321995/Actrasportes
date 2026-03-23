@@ -36,7 +36,8 @@ interface Usuario {
   telefone: string;
   cargo: string;
   departamento: string;
-  status: string;
+  // status: string;
+  status:boolean,
   tipo: string;
 }
 
@@ -92,61 +93,81 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  useEffect(() => {
-    const user = localStorage.getItem("usuarioLogado");
-    if (user) navigate("/Viagens");
-  }, [navigate]);
+ useEffect(() => {
+  const userStorage = localStorage.getItem("usuarioLogado");
 
-  const handleLogin = async () => {
-    setIsLoading(true);
-    setErro("");
+  if (userStorage) {
+    const usuario = JSON.parse(userStorage);
 
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-      const user = userCredential.user;
-
-      const usuario: Usuario = {
-        id: user.uid,
-        nome: user.displayName || "Usuário",
-        email: user.email || email,
-        cpf: "",
-        nascimento: "",
-        telefone: "",
-        cargo: "",
-        departamento: "",
-        status: "ativo",
-        tipo: "usuario" 
-      };
-
-      localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
-      setEmail("");
-      setSenha("");
-      setErro("");
+    if (usuario.status === true) {
       navigate("/Viagens");
-      
-    } catch (error: any) {
-      console.error("Erro no login:", error);
-      
-      switch (error.code) {
-        case "auth/invalid-email":
-          setErro("E-mail inválido");
-          break;
-        case "auth/user-disabled":
-          setErro("Usuário desativado");
-          break;
-        case "auth/user-not-found":
-          setErro("Usuário não encontrado");
-          break;
-        case "auth/wrong-password":
-          setErro("Senha incorreta");
-          break;
-        default:
-          setErro("Erro ao fazer login. Tente novamente.");
-      }
+    } else {
+      setErro("Sua assinatura está vencida.");
+    }
+  }
+}, [navigate]);
+
+const handleLogin = async () => {
+  setIsLoading(true);
+  setErro("");
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+    const user = userCredential.user;
+
+    // 🔥 ALTERE AQUI PARA TESTAR
+    const statusAssinatura = true; 
+
+    const usuario: Usuario = {
+      id: user.uid,
+      nome: user.displayName || "Usuário",
+      email: user.email || email,
+      cpf: "",
+      nascimento: "",
+      telefone: "",
+      cargo: "",
+      departamento: "",
+      status: statusAssinatura,
+      tipo: "usuario"
+    };
+
+    if (usuario.status === false) {
+      setErro("Sua assinatura nao vencida. Regularize o pagamento.");
+      setIsLoading(false);
+      return;
     }
 
-    setIsLoading(false);
-  };
+    localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+
+    setEmail("");
+    setSenha("");
+    setErro("");
+
+    navigate("/Viagens");
+
+  } catch (error: any) {
+    console.error("Erro no login:", error);
+
+    switch (error.code) {
+      case "auth/invalid-email":
+        setErro("E-mail inválido");
+        break;
+      case "auth/user-disabled":
+        setErro("Usuário desativado");
+        break;
+      case "auth/user-not-found":
+        setErro("Usuário não encontrado");
+        break;
+      case "auth/wrong-password":
+        setErro("Senha incorreta");
+        break;
+      default:
+        setErro("Erro ao fazer login. Tente novamente.");
+    }
+  }
+
+  setIsLoading(false);
+};
 
   const handlePasswordReset = async () => {
     setIsResetLoading(true);
