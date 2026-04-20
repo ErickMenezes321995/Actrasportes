@@ -454,7 +454,7 @@ const Sidebar = ({ children }: SidebarProps) => {
 
         <HStack spacing={4}>
           <Image
-            //  src="/assets/actransporte.png"
+            src="/assets/actransporte.png"
             alt="Logo da empresa"
             height="45px"
             objectFit="contain"
