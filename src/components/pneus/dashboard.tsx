@@ -100,11 +100,16 @@ const ModalDashboardTrocaPneuAnalitico: React.FC<Props> = ({
 
   // Função para extrair o ID do caminhão (pode ser string ou objeto)
   const extrairCaminhaoId = (caminhaoId: string | any): string => {
+     if (!caminhaoId) {
+      return '';
+    }
+    
     if (typeof caminhaoId === 'object') {
       return caminhaoId._id || caminhaoId.id || '';
     }
+    
     return caminhaoId;
-  };
+    };
 
   // Aplicar filtros
   useEffect(() => {
@@ -537,7 +542,7 @@ const ModalDashboardTrocaPneuAnalitico: React.FC<Props> = ({
                         <Tbody>
                           {trocasFiltradas.slice(0, 5).map((troca) => {
                             const caminhaoId = extrairCaminhaoId(troca.caminhaoId);
-                            const caminhao = caminhoes.find(c => c.id === caminhaoId);
+                            const caminhao = caminhaoId ? caminhoes.find(c => c && c.id === caminhaoId) : undefined;
                             
                             return (
                               <Tr key={troca.id}>
