@@ -51,10 +51,17 @@ interface NovoAbastecimentoModalProps {
   onSalvar: (abastecimento: Abastecimento) => void;
   caminhoes: Caminhao[];
 }
+const getLocalDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const formDataInicial: Omit<Abastecimento, "id"> = {
   caminhaoId: "",
-  data: new Date().toISOString().split('T')[0],
+  data: getLocalDateString(),
   arlaLitro: 0,
   valorLitroArla: 0,
   litros: 0,
@@ -76,11 +83,14 @@ const NovoAbastecimentoModal: React.FC<NovoAbastecimentoModalProps> = ({
   const [formData, setFormData] = useState<Omit<Abastecimento, "id">>(formDataInicial);
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      setFormData(formDataInicial);
-    }
-  }, [isOpen]);
+ useEffect(() => {
+  if (isOpen) {
+    setFormData({
+      ...formDataInicial,
+      data: getLocalDateString()
+    });
+  }
+}, [isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>

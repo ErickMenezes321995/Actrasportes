@@ -128,7 +128,6 @@ useEffect(() => {
       setIsLoading(true); 
       loadingTimeout = setTimeout(() => setIsLoading(false), 20000);
 
-
       const viagemResponse = await fetch(`https://backend-frotas.onrender.com/api/viagens/${id}`);
       if (!viagemResponse.ok) throw new Error("Erro ao buscar viagem");
       const viagemData: Viagem & { valorMercadoria?: string | number } = await viagemResponse.json();
@@ -137,21 +136,34 @@ useEffect(() => {
       if (!transacoesResponse.ok) throw new Error("Erro ao buscar transações");
       let transacoes: Transacao[] = await transacoesResponse.json();
 
-      const hasSeguroCarga = transacoes.some(t => t.descricao.includes("Seguro da Carga (Automático)"));
+     
+    
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      const dataAtualStr = `${ano}-${mes}-${dia}`;
+     
       
-      if (!hasSeguroCarga && viagemData.valorMercadoria) {
-        const hoje = new Date().toISOString().split('T')[0];
+      
+      const seguroJaExiste = transacoes.some(t => 
+        t.descricao === "Seguro da Carga (Automático)" && 
+        t.data === dataAtualStr
+      );
+      
+      
+      if (!seguroJaExiste && viagemData.valorMercadoria && viagemData.status !== "Concluída") {
         const valorMercadoria = typeof viagemData.valorMercadoria === 'string' 
           ? parseFloat(viagemData.valorMercadoria.replace(',', '.')) 
           : viagemData.valorMercadoria;
         const valorSeguro = valorMercadoria * 0.001;
         
         const novaTransacao: Transacao = {
-          id: viagemData.id * 1000 + 1,
-          data: hoje,
+          id: Date.now(),
+          data: dataAtualStr, 
           descricao: "Seguro da Carga (Automático)",
           tipo: "Despesa",
-          valor: valorSeguro,
+          valor: Number(valorSeguro.toFixed(2)),
           responsavel: "Sistema"
         };
 
@@ -497,7 +509,7 @@ const gerarRelatorioPDF = () => {
       new Date(t.data).toLocaleDateString("pt-BR"),
       t.descricao,
       t.tipo,
-      t.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+      t.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2  }),
       t.responsavel,
     ]),
     theme: "grid",
@@ -548,19 +560,19 @@ const gerarRelatorioPDF = () => {
   doc.setFontSize(11);
   doc.setTextColor(60);
   doc.text(
-    `Receitas: R$ ${totalReceitas.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+    `Receitas: R$ ${totalReceitas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
     14,
     yResumo + 10
   );
   doc.text(
-    `Despesas: R$ ${totalDespesas.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+    `Despesas: R$ ${totalDespesas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
     14,
     yResumo + 18
   );
 
   doc.setTextColor(saldo >= 0 ? "green" : "red");
   doc.text(
-    `Saldo Final: R$ ${saldo.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+    `Saldo Final: R$ ${saldo.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
     14,
     yResumo + 26
   );
@@ -758,7 +770,7 @@ return (
               <CardHeader py={3}>
                 <Text fontWeight="bold" color="#666666" fontSize="13px">Total de Receitas</Text>
                 <Text fontSize="lg" color="#2a6b2a" fontWeight="bold" mt={1}>
-                  R$ {receitas.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  R$ {receitas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Text>
               </CardHeader>
             </Card>
@@ -767,7 +779,7 @@ return (
               <CardHeader py={3}>
                 <Text fontWeight="bold" color="#666666" fontSize="13px">Total de Despesas</Text>
                 <Text fontSize="lg" color="#a33d3d" fontWeight="bold" mt={1}>
-                  R$ {despesas.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  R$ {despesas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Text>
               </CardHeader>
             </Card>
@@ -781,7 +793,7 @@ return (
                   fontWeight="bold"
                   mt={1}
                 >
-                  R$ {saldo.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  R$ {saldo.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </Text>
               </CardHeader>
             </Card>
@@ -895,7 +907,7 @@ return (
                         </Box>
                       </Td>
                       <Td borderColor="#e0e0e0" fontSize="13px" py={2}>
-                        R$ {transacao.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        R$ {transacao.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </Td>
                       <Td borderColor="#e0e0e0" fontSize="13px" py={2}>{transacao.responsavel}</Td>
                       <Td borderColor="#e0e0e0" py={2}>

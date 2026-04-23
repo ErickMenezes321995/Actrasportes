@@ -103,6 +103,15 @@ function StatusTag({ status }: { status: StatusViagem }) {
   );
 }
 
+const formatarDataHoraLocal = (dataString: string) => {
+  if (!dataString) return '-';
+  
+  const data = new Date(dataString);
+  if (isNaN(data.getTime())) return '-';
+  
+  return data.toLocaleString('pt-BR');
+};
+
 // Componente de badge circular para contagens
 function CircularBadge({ count, colorScheme }: { count: number, colorScheme: string }) {
   const colorMap = {
@@ -167,7 +176,7 @@ function ViagemCard({ viagem, onEdit, onView, onStart, onDelete }: {
       <Flex justify="space-between" align="center" mt={2}>
         <Box>
           <Text fontSize="11px" color="#999999">Início: {viagem.dataInicio}</Text>
-          <Text fontSize="11px" color="#999999">Término: {viagem.dataTermino}</Text>
+          <Text fontSize="11px" color="#999999">Término: {formatarDataHoraLocal(viagem.dataTermino)}</Text>
         </Box>
         <HStack spacing={1}>
           <IconButton
@@ -372,6 +381,8 @@ const GestaoViagens: React.FC = () => {
     (a, b) => ordemStatus.indexOf(a.status) - ordemStatus.indexOf(b.status)
   );
 
+  
+
   return (
     <Box mt="70px" px={{ base: 2, md: 4 }} bg="transparent" minH="calc(100vh - 70px)" fontFamily="Arial, sans-serif">
       <Card 
@@ -466,7 +477,7 @@ const GestaoViagens: React.FC = () => {
                     <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{viagem.motorista || <i>Não atribuído</i>}</Td>
                     <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{viagem.viatura || <i>Não atribuído</i>}</Td>
                     <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{viagem.dataInicio}</Td>
-                    <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{viagem.dataTermino}</Td>
+                    <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{formatarDataHoraLocal(viagem.dataTermino)}</Td>
                     <Td borderColor="#e0e0e0" py={2}>
                       <StatusTag status={viagem.status} />
                     </Td>

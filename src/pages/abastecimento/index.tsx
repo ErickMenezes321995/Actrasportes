@@ -195,6 +195,20 @@ const GestaoCombustiveis: React.FC = () => {
     }).format(valor);
   };
 
+ 
+const formatarDataLocal = (dataString: string) => {
+  if (!dataString) return '';
+  
+
+  if (dataString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const [ano, mes, dia] = dataString.split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+  
+ 
+  return new Date(dataString).toLocaleDateString('pt-BR');
+};
+
   if (isLoading) {
     return (
       <Center h="100vh">
@@ -419,7 +433,7 @@ const GestaoCombustiveis: React.FC = () => {
                     fontSize="13px"
                     color="#333333"
                   >
-                    {new Date(abastecimento.data).toLocaleDateString('pt-BR')}
+                    {formatarDataLocal(abastecimento.data)}
                   </Td>
                   <Td 
                     border="1px solid #e0e0e0" 
