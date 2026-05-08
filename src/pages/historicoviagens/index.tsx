@@ -146,38 +146,38 @@ useEffect(() => {
      
       
       
-      const seguroJaExiste = transacoes.some(t => 
-        t.descricao === "Seguro da Carga (Automático)" && 
-        t.data === dataAtualStr
-      );
+      // const seguroJaExiste = transacoes.some(t => 
+      //   t.descricao === "Seguro da Carga (Automático)" && 
+      //   t.data === dataAtualStr
+      // );
       
       
-      if (!seguroJaExiste && viagemData.valorMercadoria && viagemData.status !== "Concluída") {
-        const valorMercadoria = typeof viagemData.valorMercadoria === 'string' 
-          ? parseFloat(viagemData.valorMercadoria.replace(',', '.')) 
-          : viagemData.valorMercadoria;
-        const valorSeguro = valorMercadoria * 0.001;
+      // if (!seguroJaExiste && viagemData.valorMercadoria && viagemData.status !== "Concluída") {
+      //   const valorMercadoria = typeof viagemData.valorMercadoria === 'string' 
+      //     ? parseFloat(viagemData.valorMercadoria.replace(',', '.')) 
+      //     : viagemData.valorMercadoria;
+      //   const valorSeguro = valorMercadoria * 0.001;
         
-        const novaTransacao: Transacao = {
-          id: Date.now(),
-          data: dataAtualStr, 
-          descricao: "Seguro da Carga (Automático)",
-          tipo: "Despesa",
-          valor: Number(valorSeguro.toFixed(2)),
-          responsavel: "Sistema"
-        };
+      //   const novaTransacao: Transacao = {
+      //     id: Date.now(),
+      //     data: dataAtualStr, 
+      //     descricao: "Seguro da Carga (Automático)",
+      //     tipo: "Despesa",
+      //     valor: Number(valorSeguro.toFixed(2)),
+      //     responsavel: "Sistema"
+      //   };
 
-        transacoes = [...transacoes, novaTransacao];
+      //   transacoes = [...transacoes, novaTransacao];
         
-        const updateResponse = await fetch(`https://backend-frotas.onrender.com/api/viagens/${id}/transacoes`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(transacoes),
-        });
+      //   const updateResponse = await fetch(`https://backend-frotas.onrender.com/api/viagens/${id}/transacoes`, {
+      //     method: "PUT",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify(transacoes),
+      //   });
 
-        if (!updateResponse.ok) throw new Error("Erro ao salvar seguro automático");
-        transacoes = await updateResponse.json();
-      }
+      //   if (!updateResponse.ok) throw new Error("Erro ao salvar seguro automático");
+      //   transacoes = await updateResponse.json();
+      // }
 
       const totalReceitas = transacoes
         .filter((t) => t.tipo === "Receita")
