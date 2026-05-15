@@ -32,6 +32,7 @@ import { EditIcon } from "@chakra-ui/icons";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db, auth } from "../../firebase/config";
 import { onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import { ModalPagamento } from "../../components/pagamentos";
 
 const extjsTheme = extendTheme({
   colors: {
@@ -63,6 +64,22 @@ const extjsTheme = extendTheme({
           _disabled: {
             bg: "#a0a0a0",
             cursor: "not-allowed",
+          }
+        },
+        payment: {
+          bg: "linear-gradient(to bottom, #00a859, #008f4c)",
+          color: "white",
+          border: "none",
+          borderRadius: "4px",
+          fontWeight: "600",
+          fontSize: "13px",
+          height: "34px",
+          _hover: {
+            bg: "linear-gradient(to bottom, #008f4c, #007a41)",
+            transform: "translateY(-1px)",
+          },
+          _active: {
+            bg: "#007a41",
           }
         }
       }
@@ -152,6 +169,7 @@ const Perfil: React.FC = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isPaymentOpen, onOpen: onPaymentOpen, onClose: onPaymentClose } = useDisclosure();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -397,7 +415,7 @@ const handleSave = async () => {
   return (
     <ThemeProvider theme={extjsTheme}>
       <CSSReset />
-      <Box bg="trasnparent" minH="100vh" pt="90px" px={4} marginTop={35}>
+      <Box bg="transparent" minH="100vh" pt="90px" px={4} marginTop={35}>
         <Box maxW="800px" mx="auto">
           <Box 
             bg="white" 
@@ -427,18 +445,25 @@ const handleSave = async () => {
                   </Heading>
                   <Text color="#666">{user.email}</Text>
                   <HStack mt={2} spacing={2}>
-                    {/* <Badge colorScheme={getStatusColor(user.status)}>{user.status}</Badge> */}
                     <Badge colorScheme={getTipoColor(user.tipo)}>{user.tipo}</Badge>
                   </HStack>
                 </Box>
                 <Spacer />
-                <Button
-                  variant="extjs"
-                  leftIcon={<EditIcon />}
-                  onClick={onOpen}
-                >
-                  Editar Perfil
-                </Button>
+                <HStack spacing={3}>
+                  <Button
+                    variant="payment"
+                    onClick={onPaymentOpen}
+                  >
+                    💳 Assinar Plano
+                  </Button>
+                  <Button
+                    variant="extjs"
+                    leftIcon={<EditIcon />}
+                    onClick={onOpen}
+                  >
+                    Editar Perfil
+                  </Button>
+                </HStack>
               </Flex>
 
               <VStack align="stretch" spacing={4}>
@@ -558,7 +583,7 @@ const handleSave = async () => {
           <ModalContent>
             <ModalHeader>Editar Perfil</ModalHeader>
             <ModalCloseButton />
-            <ModalBody  pb={4} px={4} pt={4} maxH="70vh" overflowY="auto">
+            <ModalBody pb={4} px={4} pt={4} maxH="70vh" overflowY="auto">
               <VStack spacing={4}>
                 <FormControl>
                   <FormLabel>Nome Completo</FormLabel>
@@ -632,20 +657,6 @@ const handleSave = async () => {
                   />
                 </FormControl>
                 
-                {/* <FormControl>
-                  <FormLabel>Status</FormLabel>
-                  <Select
-                    variant="extjs"
-                    name="status"
-                    value={editUser?.status || ""}
-                    onChange={handleChange}
-                  >
-                    <option value="ativo">Ativo</option>
-                    <option value="inativo">Inativo</option>
-                    <option value="pendente">Pendente</option>
-                  </Select>
-                </FormControl> */}
-                
                 <FormControl>
                   <FormLabel>Tipo de Usuário</FormLabel>
                   <Select
@@ -677,6 +688,17 @@ const handleSave = async () => {
             </ModalFooter>
           </ModalContent>
         </Modal>
+
+        {/* Modal de Pagamento */}
+        <ModalPagamento 
+          isOpen={isPaymentOpen}
+          onClose={onPaymentClose}
+          usuario={{
+            id: user.uid,
+            nome: user.nome,
+            email: user.email
+          }}
+        />
       </Box>
     </ThemeProvider>
   );
