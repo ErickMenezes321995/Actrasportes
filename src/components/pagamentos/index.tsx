@@ -27,6 +27,11 @@ import {
   Spinner,
   HStack,
   Badge,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
 } from '@chakra-ui/react';
 import { ExternalLinkIcon, CopyIcon, CheckCircleIcon } from '@chakra-ui/icons';
 import QRCode from 'react-qr-code';
@@ -46,6 +51,7 @@ interface ModalPagamentoProps {
     id: string;
     nome: string;
     email: string;
+    cpf?: string;
   } | null;
 }
 
@@ -56,12 +62,15 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
 }) => {
   const [selectedPlan, setSelectedPlan] = useState<Plano | null>(null);
   const [step, setStep] = useState<'plans' | 'payment'>('plans');
+  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'checkout'>('pix');
   const [pixCode, setPixCode] = useState('');
   const [qrCodeValue, setQrCodeValue] = useState('');
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>('pending');
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState('');
   const toast = useToast();
 
   // Planos disponíveis
@@ -69,7 +78,7 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
     {
       id: "basico",
       nome: "Plano Básico",
-      valor: 1.00,
+      valor: 49.90,
       descricao: "Ideal para pequenos negócios",
       periodo: "mês"
     },
@@ -88,6 +97,10 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
       periodo: "mês"
     }
   ];
+
+  const formatarPreco = (valor: number) => {
+    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
 
   // Função para gerar Pix via backend
   const gerarPix = async (plano: Plano) => {
@@ -116,7 +129,7 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
         
         toast({
           title: "QR Code gerado!",
-          description: `Plano ${plano.nome} - R$ ${plano.valor.toFixed(2)}`,
+          description: `Plano ${plano.nome} - ${formatarPreco(plano.valor)}`,
           status: "success",
           duration: 3000,
           isClosable: true,
@@ -140,7 +153,57 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
     }
   };
 
-  // Consultar status do pagamento
+  // Função para criar Checkout Pro
+  const criarCheckout = async (plano: Plano) => {
+    setProcessingPayment(true);
+    try {
+      const response = await fetch('https://backend-frotas.onrender.com/api/pagamentos/criar-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          valor: plano.valor,
+          descricao: plano.nome,
+          email: usuario?.email,
+          nome: usuario?.nome
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.url) {
+        // Redirecionar para o checkout do Mercado Pago
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Erro ao criar checkout');
+      }
+    } catch (error) {
+      console.error('Erro no checkout:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar o checkout. Tente novamente.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
+  // Processar pagamento baseado no método escolhido
+  const processarPagamento = async () => {
+    if (!selectedPlan) return;
+    
+    if (paymentMethod === 'pix') {
+      await gerarPix(selectedPlan);
+    } else {
+      await criarCheckout(selectedPlan);
+    }
+  };
+
+  // Consultar status do pagamento (apenas para PIX)
   const consultarStatus = async () => {
     if (!paymentId) return;
     
@@ -171,7 +234,7 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
     }
   };
 
-  // Polling para verificar status a cada 5 segundos
+  // Polling para verificar status do PIX
   useEffect(() => {
     if (isOpen && step === 'payment' && paymentId && paymentStatus === 'pending') {
       const interval = setInterval(consultarStatus, 5000);
@@ -187,6 +250,8 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
     setQrCodeValue('');
     setPaymentId(null);
     setPaymentStatus('pending');
+    setPaymentMethod('pix');
+    setCheckoutUrl('');
     onClose();
   };
 
@@ -216,7 +281,7 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={handleClose} isCentered size="md">
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent maxW="500px">
         <ModalHeader>
           {step === 'plans' ? 'Escolha seu Plano' : `Pagamento - ${selectedPlan?.nome}`}
         </ModalHeader>
@@ -234,10 +299,11 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
                   w="100%"
                   cursor="pointer"
                   transition="all 0.3s"
-                  _hover={{ borderColor: "blue.500", transform: "scale(1.02)" }}
+                  _hover={{ borderColor: "green.500", transform: "scale(1.02)" }}
                   onClick={() => {
                     setSelectedPlan(plano);
-                    gerarPix(plano);
+                    setPaymentMethod('pix');
+                    setStep('payment');
                   }}
                 >
                   <HStack justify="space-between">
@@ -246,8 +312,8 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
                       <Text fontSize="sm" color="gray.500">{plano.descricao}</Text>
                     </Box>
                     <Box textAlign="right">
-                      <Text fontWeight="bold" fontSize="xl" color="blue.500">
-                        R$ {plano.valor.toFixed(2)}
+                      <Text fontWeight="bold" fontSize="xl" color="green.500">
+                        {formatarPreco(plano.valor)}
                       </Text>
                       <Text fontSize="xs" color="gray.400">/{plano.periodo}</Text>
                     </Box>
@@ -255,93 +321,132 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
                 </Box>
               ))}
             </VStack>
-          ) : loading ? (
-            <VStack spacing={4} py={8}>
-              <Spinner size="xl" color="blue.500" />
-              <Text>Gerando QR Code...</Text>
-            </VStack>
           ) : (
             <VStack spacing={4}>
-              <Alert 
-                status="info" 
-                borderRadius="8px"
-                bg="blue.50"
-              >
-                <AlertIcon />
-                <Box>
-                  <AlertTitle fontSize="sm">
-                    Valor a pagar: R$ {selectedPlan?.valor.toFixed(2)}
-                  </AlertTitle>
-                  <AlertDescription fontSize="xs">
-                    Escaneie o QR Code abaixo ou copie o código Pix
-                  </AlertDescription>
-                </Box>
-              </Alert>
+              {/* Abas de métodos de pagamento */}
+              <Tabs isFitted variant="enclosed" onChange={(index) => {
+                const methods = ['pix', 'checkout'];
+                setPaymentMethod(methods[index] as 'pix' | 'checkout');
+              }}>
+                <TabList mb="1em">
+                  <Tab>📱 Pix</Tab>
+                  <Tab>💳 Cartão de Crédito/Débito</Tab>
+                </TabList>
+                <TabPanels>
+                  {/* Painel Pix */}
+                  <TabPanel p={0}>
+                    {loading ? (
+                      <VStack spacing={4} py={8}>
+                        <Spinner size="xl" color="green.500" />
+                        <Text>Gerando QR Code...</Text>
+                      </VStack>
+                    ) : qrCodeValue ? (
+                      <VStack spacing={4}>
+                        <Alert status="info" borderRadius="8px" bg="blue.50">
+                          <AlertIcon />
+                          <Box>
+                            <AlertTitle fontSize="sm">
+                              Valor a pagar: {formatarPreco(selectedPlan?.valor || 0)}
+                            </AlertTitle>
+                            <AlertDescription fontSize="xs">
+                              Escaneie o QR Code abaixo ou copie o código Pix
+                            </AlertDescription>
+                          </Box>
+                        </Alert>
 
-              <Box 
-                p={4} 
-                bg="white" 
-                borderRadius="12px"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                border="2px solid #e0e0e0"
-              >
-                {qrCodeValue && (
-                  <QRCode 
-                    value={qrCodeValue}
-                    size={200}
-                    bgColor="#FFFFFF"
-                    fgColor="#000000"
-                    level="H"
-                  />
-                )}
-              </Box>
+                        <Box p={4} bg="white" borderRadius="12px" display="flex" justifyContent="center" border="2px solid #e0e0e0">
+                          <QRCode value={qrCodeValue} size={200} bgColor="#FFFFFF" fgColor="#000000" level="H" />
+                        </Box>
 
-              <FormControl>
-                <FormLabel>Código Pix Copia e Cola</FormLabel>
-                <InputGroup size="md">
-                  <Input
-                    pr="4.5rem"
-                    type="text"
-                    value={pixCode}
-                    isReadOnly
-                    fontSize="10px"
-                    fontFamily="monospace"
-                    height="auto"
-                    minH="60px"
-                    padding="8px"
-                  />
-                  <InputRightElement width="4.5rem" height="100%">
-                    <IconButton
-                      h="1.75rem"
-                      size="sm"
-                      aria-label="Copiar código Pix"
-                      icon={copied ? <CheckCircleIcon /> : <CopyIcon />}
-                      onClick={handleCopiarPix}
-                      colorScheme={copied ? "green" : "blue"}
-                      variant="ghost"
-                    />
-                  </InputRightElement>
-                </InputGroup>
-              </FormControl>
+                        <FormControl>
+                          <FormLabel>Código Pix Copia e Cola</FormLabel>
+                          <InputGroup size="md">
+                            <Input
+                              pr="4.5rem"
+                              type="text"
+                              value={pixCode}
+                              isReadOnly
+                              fontSize="10px"
+                              fontFamily="monospace"
+                              height="auto"
+                              minH="60px"
+                              padding="8px"
+                            />
+                            <InputRightElement width="4.5rem" height="100%">
+                              <IconButton
+                                h="1.75rem"
+                                size="sm"
+                                aria-label="Copiar código Pix"
+                                icon={copied ? <CheckCircleIcon /> : <CopyIcon />}
+                                onClick={handleCopiarPix}
+                                colorScheme={copied ? "green" : "blue"}
+                                variant="ghost"
+                              />
+                            </InputRightElement>
+                          </InputGroup>
+                        </FormControl>
 
-              {paymentStatus === 'approved' && (
-                <Alert status="success" borderRadius="8px">
-                  <AlertIcon />
-                  ✅ Pagamento confirmado! Seu plano foi ativado.
-                </Alert>
-              )}
+                        {paymentStatus === 'approved' && (
+                          <Alert status="success" borderRadius="8px">
+                            <AlertIcon />
+                            ✅ Pagamento confirmado! Seu plano foi ativado.
+                          </Alert>
+                        )}
+                      </VStack>
+                    ) : (
+                      <VStack spacing={4}>
+                        <Alert status="info" borderRadius="8px">
+                          <AlertIcon />
+                          Clique no botão abaixo para gerar o QR Code Pix
+                        </Alert>
+                        <Button
+                          w="100%"
+                          colorScheme="green"
+                          onClick={() => gerarPix(selectedPlan!)}
+                          isLoading={loading}
+                          loadingText="Gerando..."
+                        >
+                          Gerar QR Code Pix
+                        </Button>
+                      </VStack>
+                    )}
+                  </TabPanel>
 
-              <Text fontSize="12px" color="gray.500" textAlign="center">
-                ⏱️ Após o pagamento, a confirmação pode levar alguns minutos
-              </Text>
+                  {/* Painel Checkout Pro */}
+                  <TabPanel p={0}>
+                    <VStack spacing={4}>
+                      <Alert status="info" borderRadius="8px" bg="blue.50">
+                        <AlertIcon />
+                        <Box>
+                          <AlertTitle fontSize="sm">
+                            Valor: {formatarPreco(selectedPlan?.valor || 0)}
+                          </AlertTitle>
+                          <AlertDescription fontSize="xs">
+                            Você será redirecionado para o Mercado Pago para concluir o pagamento
+                          </AlertDescription>
+                        </Box>
+                      </Alert>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setStep('plans')}
-              >
+                      <Button
+                        w="100%"
+                        colorScheme="green"
+                        size="lg"
+                        onClick={() => criarCheckout(selectedPlan!)}
+                        isLoading={processingPayment}
+                        loadingText="Redirecionando..."
+                      >
+                        Pagar com Cartão
+                      </Button>
+
+                      <Text fontSize="12px" color="gray.500" textAlign="center">
+                        🔒 Pagamento 100% seguro via Mercado Pago
+                      </Text>
+                    </VStack>
+                  </TabPanel>
+                </TabPanels>
+              </Tabs>
+
+              <Button variant="outline" size="sm" onClick={() => setStep('plans')}>
                 Voltar para planos
               </Button>
             </VStack>
@@ -351,14 +456,13 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
 
           <Box w="100%">
             <Text fontSize="13px" fontWeight="600" mb={2}>
-              Como pagar:
+              Métodos de pagamento aceitos:
             </Text>
-            <VStack align="start" spacing={1} fontSize="12px" color="gray.600">
-              <Text>1. Escolha o plano desejado</Text>
-              <Text>2. Escaneie o QR Code com o app do seu banco</Text>
-              <Text>3. Confirme o pagamento no app</Text>
-              <Text>4. Aguarde a confirmação automática</Text>
-            </VStack>
+            <HStack spacing={2} justify="center" flexWrap="wrap">
+              <Badge colorScheme="green">Pix</Badge>
+              <Badge colorScheme="blue">Cartão de Crédito</Badge>
+              <Badge colorScheme="blue">Cartão de Débito</Badge>
+            </HStack>
           </Box>
         </ModalBody>
 
