@@ -78,24 +78,24 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
     {
       id: "basico",
       nome: "Plano Básico",
-      valor: 49.90,
+      valor: 80.90,
       descricao: "Ideal para pequenos negócios",
       periodo: "mês"
     },
-    {
-      id: "profissional",
-      nome: "Plano Profissional",
-      valor: 99.90,
-      descricao: "Para empresas em crescimento",
-      periodo: "mês"
-    },
-    {
-      id: "enterprise",
-      nome: "Plano Enterprise",
-      valor: 299.90,
-      descricao: "Solução completa para grandes empresas",
-      periodo: "mês"
-    }
+    // {
+    //   id: "profissional",
+    //   nome: "Plano Profissional",
+    //   valor: 99.90,
+    //   descricao: "Para empresas em crescimento",
+    //   periodo: "mês"
+    // },
+    // {
+    //   id: "enterprise",
+    //   nome: "Plano Enterprise",
+    //   valor: 299.90,
+    //   descricao: "Solução completa para grandes empresas",
+    //   periodo: "mês"
+    // }
   ];
 
   const formatarPreco = (valor: number) => {
