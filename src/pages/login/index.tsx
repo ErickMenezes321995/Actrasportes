@@ -26,20 +26,8 @@ import { useNavigate } from "react-router-dom";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../firebase/config";
-
-interface Usuario {
-  id: string;
-  nome: string;
-  cpf: string;
-  nascimento: string;
-  email: string;
-  telefone: string;
-  cargo: string;
-  departamento: string;
-  // status: string;
-  status:boolean,
-  tipo: string;
-}
+import { getUserById, Usuario } from "../../services/userService";
+import { ModalPagamento } from "../../components/pagamentos";
 
 const FullScreenLoading = () => {
   return (
@@ -83,91 +71,138 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [resetEmail, setResetEmail] = useState("");
-  const [erro, setErro] = useState("");
+  const [erro, setErro] = useState<string>("");
   const [resetError, setResetError] = useState("");
   const [resetSuccess, setResetSuccess] = useState("");
   const [showSenha, setShowSenha] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isResetLoading, setIsResetLoading] = useState(false);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [showPaymentLink, setShowPaymentLink] = useState(false);
+  const [inactiveUser, setInactiveUser] = useState<{ id: string; nome: string; email: string; cpf?: string } | null>(null);
+  
+  const { isOpen: isResetOpen, onOpen: onResetOpen, onClose: onResetClose } = useDisclosure();
+  const { isOpen: isPaymentOpen, onOpen: onPaymentOpen, onClose: onPaymentClose } = useDisclosure();
   const navigate = useNavigate();
   const toast = useToast();
 
- useEffect(() => {
-  const userStorage = localStorage.getItem("usuarioLogado");
-
-  if (userStorage) {
-    const usuario = JSON.parse(userStorage);
-
-    if (usuario.status === true) {
-      navigate("/Viagens");
-    } else {
-      setErro("Sua assinatura está vencida.");
-    }
-  }
-}, [navigate]);
-
-const handleLogin = async () => {
-  setIsLoading(true);
-  setErro("");
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-    const user = userCredential.user;
-
-    // 🔥 ALTERE AQUI PARA TESTAR
-    const statusAssinatura = true; 
-
-    const usuario: Usuario = {
-      id: user.uid,
-      nome: user.displayName || "Usuário",
-      email: user.email || email,
-      cpf: "",
-      nascimento: "",
-      telefone: "",
-      cargo: "",
-      departamento: "",
-      status: statusAssinatura,
-      tipo: "usuario"
+  useEffect(() => {
+    const checkStoredUserStatus = async () => {
+      const userStorage = localStorage.getItem("usuarioLogado");
+      
+      if (userStorage) {
+        try {
+          const usuario = JSON.parse(userStorage);
+          
+          
+          const userData = await getUserById(usuario.id);
+          
+          if (userData && userData.status === true) {
+           
+            localStorage.setItem("usuarioLogado", JSON.stringify(userData));
+            navigate("/Viagens");
+          } else {
+           
+            localStorage.removeItem("usuarioLogado");
+            setErro("Sua conta está inativa. Entre em contato com o suporte.");
+            setShowPaymentLink(false);
+          }
+        } catch (error) {
+          console.error("Erro ao verificar status:", error);
+          localStorage.removeItem("usuarioLogado");
+        }
+      }
     };
+    
+    checkStoredUserStatus();
+  }, [navigate]);
 
-    if (usuario.status === false) {
-      setErro("Sua assinatura nao vencida. Regularize o pagamento.");
-      setIsLoading(false);
-      return;
-    }
-
-    localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
-
-    setEmail("");
-    setSenha("");
+  const handleOpenPaymentModal = () => {
+    setShowPaymentLink(false);
     setErro("");
+    onPaymentOpen();
+  };
 
-    navigate("/Viagens");
+  const handleLogin = async () => {
+    setIsLoading(true);
+    setErro("");
+    setShowPaymentLink(false);
 
-  } catch (error: any) {
-    console.error("Erro no login:", error);
+    try {
+      
+      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+      const firebaseUser = userCredential.user;
 
-    switch (error.code) {
-      case "auth/invalid-email":
-        setErro("E-mail inválido");
-        break;
-      case "auth/user-disabled":
-        setErro("Usuário desativado");
-        break;
-      case "auth/user-not-found":
-        setErro("Usuário não encontrado");
-        break;
-      case "auth/wrong-password":
-        setErro("Senha incorreta");
-        break;
-      default:
-        setErro("Erro ao fazer login. Tente novamente.");
+      const userData = await getUserById(firebaseUser.uid);
+
+      if (!userData) {
+        setErro("Usuário não encontrado no sistema. Contate o administrador.");
+        await auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      
+      if (userData.status === false) {
+        setInactiveUser({
+          id: firebaseUser.uid,
+          nome: userData.nome,
+          email: userData.email,
+          cpf: userData.cpf
+        });
+        
+        setErro("Sua assinatura está vencida.");
+        setShowPaymentLink(true);
+        
+        await auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      localStorage.setItem("usuarioLogado", JSON.stringify(userData));
+
+      setEmail("");
+      setSenha("");
+      setErro("");
+
+      toast({
+        title: "Login realizado com sucesso!",
+        description: `Bem-vindo(a), ${userData.nome}`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "top-right"
+      });
+
+      navigate("/Viagens");
+
+    } catch (error: any) {
+      console.error("Erro no login:", error);
+      
+      if (error.code === "permission-denied") {
+        setErro("Erro de permissão. Verifique as regras do Firestore.");
+      } else {
+        switch (error.code) {
+          case "auth/invalid-email":
+            setErro("E-mail inválido");
+            break;
+          case "auth/user-disabled":
+            setErro("Usuário desativado no sistema");
+            break;
+          case "auth/user-not-found":
+            setErro("Usuário não encontrado");
+            break;
+          case "auth/wrong-password":
+            setErro("Senha incorreta");
+            break;
+          default:
+            setErro("Erro ao fazer login. Tente novamente.");
+        }
+      }
+      setShowPaymentLink(false);
+    } finally {
+      setIsLoading(false);
     }
-  }
-
-  setIsLoading(false);
-};
+  };
 
   const handlePasswordReset = async () => {
     setIsResetLoading(true);
@@ -195,7 +230,7 @@ const handleLogin = async () => {
       });
       
       setTimeout(() => {
-        onClose();
+        onResetClose();
         setResetEmail("");
         setResetSuccess("");
       }, 3000);
@@ -213,9 +248,9 @@ const handleLogin = async () => {
         default:
           setResetError("Erro ao enviar e-mail de recuperação. Tente novamente.");
       }
+    } finally {
+      setIsResetLoading(false);
     }
-
-    setIsResetLoading(false);
   };
 
   const toggleShowSenha = () => setShowSenha(!showSenha);
@@ -233,17 +268,17 @@ const handleLogin = async () => {
         bgSize="cover"
       >
         <Box
-          bg="rgba(255, 255, 255, 0.9)"
+          bg="rgba(255, 255, 255, 0.95)"
           p={8}
-          borderRadius="md"
-          boxShadow="lg"
+          borderRadius="lg"
+          boxShadow="2xl"
           maxW="lg"
           w="100%"
           opacity={isLoading ? 0.5 : 1}
           pointerEvents={isLoading ? "none" : "auto"}
         >
           <Stack spacing={6} align="center" mb={4}>
-            <Heading fontSize="3xl" textAlign="center">
+            <Heading fontSize="3xl" textAlign="center" color="teal.600">
               Sistema de Gestão de Frota
             </Heading>
             <Text fontSize="lg" color="gray.600">
@@ -252,7 +287,7 @@ const handleLogin = async () => {
           </Stack>
 
           <Stack spacing={4}>
-            <FormControl id="email">
+            <FormControl id="email" isRequired>
               <FormLabel>E-mail</FormLabel>
               <Input
                 type="email"
@@ -260,11 +295,11 @@ const handleLogin = async () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 isDisabled={isLoading}
+                size="lg"
               />
             </FormControl>
            
-           
-            <FormControl id="senha">
+            <FormControl id="senha" isRequired>
               <FormLabel>Senha</FormLabel>
               <InputGroup>
                 <Input
@@ -273,8 +308,9 @@ const handleLogin = async () => {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   isDisabled={isLoading}
+                  size="lg"
                 />
-                <InputRightElement width="3rem">
+                <InputRightElement width="3rem" height="full">
                   <Button
                     h="1.5rem"
                     size="sm"
@@ -289,9 +325,22 @@ const handleLogin = async () => {
             </FormControl>
 
             {erro && (
-              <Text color="red.500" fontSize="sm" textAlign="center">
-                {erro}
-              </Text>
+              <Box textAlign="center">
+                <Text color="red.500" fontSize="sm" fontWeight="medium" mb={showPaymentLink ? 2 : 0}>
+                  {erro}
+                </Text>
+                {showPaymentLink && (
+                  <Button
+                    variant="link"
+                    color="teal.500"
+                    onClick={handleOpenPaymentModal}
+                    fontWeight="bold"
+                    fontSize="sm"
+                  >
+                    Clique aqui para renovar sua assinatura
+                  </Button>
+                )}
+              </Box>
             )}
 
             <Stack spacing={6} pt={4}>
@@ -299,10 +348,12 @@ const handleLogin = async () => {
                 bg="teal.500"
                 color="white"
                 _hover={{ bg: "teal.600" }}
+                _active={{ bg: "teal.700" }}
                 onClick={handleLogin}
                 width="100%"
                 isLoading={isLoading}
                 loadingText="Entrando"
+                size="lg"
               >
                 Entrar
               </Button>
@@ -311,7 +362,7 @@ const handleLogin = async () => {
                 variant="link"
                 color="teal.500"
                 _hover={{ textDecoration: "none", color: "teal.600" }}
-                onClick={onOpen}
+                onClick={onResetOpen}
                 isDisabled={isLoading}
               >
                 Esqueci minha senha
@@ -326,8 +377,8 @@ const handleLogin = async () => {
       </Flex>
 
       {/* Modal de Recuperação de Senha */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
+      <Modal isOpen={isResetOpen} onClose={onResetClose} isCentered>
+        <ModalOverlay backdropFilter="blur(5px)" />
         <ModalContent>
           <ModalHeader>Recuperar Senha</ModalHeader>
           <ModalCloseButton />
@@ -361,7 +412,7 @@ const handleLogin = async () => {
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="outline" mr={3} onClick={onClose} isDisabled={isResetLoading}>
+            <Button variant="outline" mr={3} onClick={onResetClose} isDisabled={isResetLoading}>
               Cancelar
             </Button>
             <Button
@@ -375,6 +426,12 @@ const handleLogin = async () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+     <ModalPagamento
+        isOpen={isPaymentOpen}
+        onClose={onPaymentClose}
+        usuario={inactiveUser}
+      />
     </>
   );
 };

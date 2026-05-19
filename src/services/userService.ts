@@ -19,7 +19,7 @@ export interface Usuario {
   telefone: string;
   cargo: string;
   departamento: string;
-  status: string;
+  status: boolean; // Agora é boolean!
   tipo: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -78,6 +78,17 @@ export const updateUser = async (userId: string, userData: Partial<Usuario>): Pr
     return true;
   } catch (error) {
     console.error("Erro ao atualizar usuário:", error);
+    return false;
+  }
+};
+
+// Função específica para verificar status (já retorna boolean)
+export const checkUserStatus = async (userId: string): Promise<boolean> => {
+  try {
+    const user = await getUserById(userId);
+    return user?.status === true;
+  } catch (error) {
+    console.error("Erro ao verificar status:", error);
     return false;
   }
 };
