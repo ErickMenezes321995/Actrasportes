@@ -1,11 +1,11 @@
-# 🚛 Sistema de Gestão de Frota
+# Sistema de Gestão de Frota
 
 Sistema web Full Stack desenvolvido para gerenciamento de operações logísticas, permitindo o controle de viagens, 
 veículos, motoristas, clientes, fornecedores, abastecimentos, manutenções e despesas financeiras.
 
 ---
 
-## 📸 Visão Geral
+##  Visão Geral
 
 O sistema foi desenvolvido para empresas de transporte que desejam centralizar toda a gestão da frota em uma única plataforma.
 
@@ -29,7 +29,7 @@ O sistema foi desenvolvido para empresas de transporte que desejam centralizar t
 
 ---
 
-# 🛠 Tecnologias
+# Tecnologias
 
 ## Frontend
 
@@ -57,7 +57,7 @@ O sistema foi desenvolvido para empresas de transporte que desejam centralizar t
 
 ---
 
-# 🏗 Arquitetura
+# Arquitetura
 
 ```
 React (Frontend)
@@ -74,7 +74,7 @@ React (Frontend)
 
 ---
 
-# 📂 Estrutura do Projeto
+# Estrutura do Projeto
 
 ```
 src
@@ -89,9 +89,9 @@ src
 
 ---
 
-# 📦 Módulos
+# Módulos
 
-## 🚚 Viagens
+## Viagens
 
 - Cadastro
 - Edição
@@ -103,7 +103,7 @@ src
 
 ---
 
-## 🚛 Caminhões
+## Caminhões
 
 - Cadastro
 - Edição
@@ -114,7 +114,7 @@ src
 
 ---
 
-## 👨‍✈️ Motoristas
+##  Motoristas
 
 - Cadastro
 - Edição
@@ -124,7 +124,7 @@ src
 
 ---
 
-## ⛽ Abastecimentos
+## Abastecimentos
 
 - Registro de abastecimentos
 - Valor total
@@ -134,7 +134,7 @@ src
 
 ---
 
-## 🔧 Manutenção Preventiva
+## Manutenção Preventiva
 
 - Agendamento
 - Histórico
@@ -144,7 +144,7 @@ src
 
 ---
 
-## 🛢 Troca de Óleo
+## Troca de Óleo
 
 - Registro das trocas
 - Quilometragem
@@ -153,7 +153,7 @@ src
 
 ---
 
-## 🛞 Pneus
+## Pneus
 
 - Controle de pneus
 - Marca
@@ -163,7 +163,7 @@ src
 
 ---
 
-## 👥 Clientes
+## Clientes
 
 - Cadastro
 - Atualização
@@ -171,7 +171,7 @@ src
 
 ---
 
-## 🏢 Fornecedores
+## Fornecedores
 
 - Cadastro
 - Atualização
@@ -179,7 +179,7 @@ src
 
 ---
 
-## 💰 Financeiro
+## Financeiro
 
 Cada viagem possui:
 
@@ -194,7 +194,7 @@ Além de:
 
 ---
 
-## 🗺 Mapa
+## Mapa
 
 Visualização da rota utilizando:
 
@@ -204,7 +204,7 @@ Visualização da rota utilizando:
 
 ---
 
-# 🔐 Autenticação
+# Autenticação
 
 O sistema utiliza Firebase Authentication para login.
 
@@ -217,7 +217,7 @@ Funcionalidades:
 
 ---
 
-# 📊 Dashboard
+# Dashboard
 
 Indicadores disponíveis:
 
@@ -230,7 +230,7 @@ Indicadores disponíveis:
 
 ---
 
-# 🌐 API
+# API
 
 Base URL
 
@@ -254,7 +254,7 @@ Principais endpoints
 
 ---
 
-# 📑 Funcionalidades
+# Funcionalidades
 
 - CRUD completo de todos os módulos
 - Sistema responsivo
@@ -267,7 +267,7 @@ Principais endpoints
 
 ---
 
-# 🚀 Como executar
+# Como executar
 
 ## Instale as dependências
 
@@ -281,7 +281,7 @@ npm install
 npm start
 ```
 
-# 👨‍💻 Desenvolvedor
+# Desenvolvedor
 
 **Erick Saraiva**
 
