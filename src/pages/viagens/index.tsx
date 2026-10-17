@@ -384,7 +384,7 @@ const GestaoViagens: React.FC = () => {
   
 
   return (
-    <Box mt="70px" px={{ base: 2, md: 4 }} bg="transparent" minH="calc(100vh - 70px)" fontFamily="Arial, sans-serif">
+    <Box mt="90px" px={{ base: 2, md: 4 }} bg="transparent" minH="calc(100vh - 70px)" fontFamily="Arial, sans-serif">
       <Card 
         w="100%" 
         maxW="1200px" 
