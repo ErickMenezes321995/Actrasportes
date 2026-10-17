@@ -454,7 +454,13 @@ const GestaoViagens: React.FC = () => {
         </SimpleGrid>
         </CardHeader>
 
-        <CardBody overflowX="auto" px={0} fontFamily="Arial, sans-serif">
+        <CardBody
+          maxH={{ base: "calc(100vh - 330px)", md: "calc(100vh - 250px)" }}
+          overflowX="auto"
+          overflowY="auto"
+          px={0}
+          fontFamily="Arial, sans-serif"
+        >
           {!isMobile ? (
             <Table variant="simple" size="sm" fontFamily="Arial, sans-serif">
               <Thead bg="#f5f5f5">
