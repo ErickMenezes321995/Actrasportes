@@ -18,6 +18,8 @@ import { PrivateRoute } from "./PrivateRoute";
 import Perfil from "./pages/perfil";
 import CadastroUsuario from "./components/cadastro/CadastroUsuario";
 import Rota from "./pages/Rota/Index"
+import RelatorioViagens from "./pages/relatorioviagens";
+import Configuracao from "./pages/configuracao";
 
 export const RoutesApp = () => {
   return (
@@ -35,6 +37,8 @@ export const RoutesApp = () => {
       <Route path="/manutencao" element={<PrivateRoute><Preventiva /></PrivateRoute>} />
       {/* <Route path="/corretiva" element={<PrivateRoute><Corretiva /></PrivateRoute>} /> */}
       <Route path="/relatorio" element={<PrivateRoute><Relatorio /></PrivateRoute>} />
+      <Route path="/relatorio-viagens" element={<PrivateRoute><RelatorioViagens /></PrivateRoute>} />
+      <Route path="/configuracao" element={<PrivateRoute><Configuracao /></PrivateRoute>} />
       <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
       <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
       <Route path="/rota/:id" element={<Rota />}/>
