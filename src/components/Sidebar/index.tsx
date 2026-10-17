@@ -39,6 +39,7 @@ import {
   MdLocalGasStation,
   MdDriveEta,
   MdAppRegistration,
+  MdSettings,
 } from "react-icons/md";
 import { IconType } from "react-icons";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -56,6 +57,7 @@ type NavItem = {
   icon: IconType;
   children?: NavItem[];
   badge?: string;
+  disabled?: boolean;
 };
 
 interface Usuario {
@@ -226,6 +228,7 @@ const Sidebar = ({ children }: SidebarProps) => {
         { label: "Manutenção", href: "/manutencao", icon: MdBuild },
       ],
     },
+    { label: "Configuração", href: "/configuracao", icon: MdSettings },
   ];
 
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
@@ -256,7 +259,7 @@ const Sidebar = ({ children }: SidebarProps) => {
       )}
 
       <VStack align="start" spacing={1} p={2}>
-        {navItems.map(({ label, href, icon, children, badge }) => {
+        {navItems.map(({ label, href, icon, children, badge, disabled }) => {
           const hasChildren = !!children;
           const isOpen = openSubmenus[label];
           const isActive = href ? isActiveLink(href) : false;
@@ -312,6 +315,35 @@ const Sidebar = ({ children }: SidebarProps) => {
                           <ChevronDownIcon boxSize={3} />
                         )}
                       </Flex>
+                    </Flex>
+                  )}
+                </Flex>
+              ) : disabled ? (
+                <Flex
+                  alignItems="center"
+                  px={3}
+                  py={2}
+                  borderRadius="lg"
+                  justifyContent={collapsed && !isMobile ? "center" : "flex-start"}
+                  cursor="not-allowed"
+                  opacity={0.55}
+                  aria-disabled="true"
+                  role="button"
+                  title="Em breve"
+                >
+                  <Icon
+                    as={icon as React.ElementType}
+                    boxSize={5}
+                    mr={collapsed && !isMobile ? 0 : 3}
+                    mx={collapsed && !isMobile ? "auto" : undefined}
+                    color="gray.400"
+                  />
+                  {(!collapsed || isMobile) && (
+                    <Flex align="center" justify="space-between" w="full">
+                      <Text fontSize="sm" color="gray.400">{label}</Text>
+                      <Badge bg="gray.600" color="gray.200" fontSize="xs" borderRadius="full" px={2}>
+                        {badge}
+                      </Badge>
                     </Flex>
                   )}
                 </Flex>

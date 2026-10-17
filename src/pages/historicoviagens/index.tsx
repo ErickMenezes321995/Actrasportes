@@ -29,7 +29,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import ModalAdiantamento from "../../components/historicoviagem/ModalAdiantamento";
 import ModalNovaReceita from "../../components/historicoviagem/ModalNovaReceita";
-import ModalNovaDespesa from "../../components/historicoviagem/ModalNovaDespesa";
+import ModalNovaDespesa, { NovaDespesaPayload } from "../../components/historicoviagem/ModalNovaDespesa";
 import { useNavigate } from "react-router-dom";
 
 import { useDisclosure } from "@chakra-ui/react";
@@ -44,6 +44,7 @@ interface Transacao {
   tipo: TipoTransacao;
   valor: number;
   responsavel: string;
+  categoriaDespesa?: string;
 }
 
 interface Viagem {
@@ -52,6 +53,8 @@ interface Viagem {
   destino: string;
   status: "Pendente" | "Em andamento" | "Concluída" | "Cancelada";
   transacoes: Transacao[];
+  viatura?: string;
+  odometro?: number;
 }
 
 
@@ -345,48 +348,105 @@ const handleSalvarReceita = async (receita: {
   }
 };
 
-const handleSalvarDespesa = async (despesa: {
-  data: string;
-  descricao: string;
-  valor: number;
-  responsavel: string;
-  tipo: "Despesa";
-}) => {
-  if (!viagem) return;
+const handleSalvarDespesa = async (despesa: NovaDespesaPayload): Promise<boolean> => {
+  if (!viagem) return false;
 
-  const novaTransacao = {
-    id: Date.now(),
-    idViagem: viagem.id,
-    ...despesa,
-  };
-
-  const transacoesAtualizadas = [...(viagem.transacoes || []), novaTransacao];
+  let recursoCriado: { url: string; id: string } | null = null;
 
   try {
-    const response = await fetch(`https://backend-frotas.onrender.com/api/viagens/${viagem.id}/transacoes`, {
+    if (despesa.abastecimento) {
+      const url = "https://backend-frotas.onrender.com/api/abastecimentos";
+      const resposta = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          caminhaoId: despesa.abastecimento.caminhaoId,
+          data: despesa.data,
+          arlaLitro: 0,
+          valorLitroArla: 0,
+          litros: despesa.abastecimento.litros,
+          valorLitro: despesa.valor / despesa.abastecimento.litros,
+          valorTotal: despesa.valor,
+          posto: despesa.abastecimento.posto,
+          odometro: despesa.abastecimento.odometro,
+          tipoCombustivel: despesa.abastecimento.tipoCombustivel,
+          observacoes: despesa.descricao,
+        }),
+      });
+      if (!resposta.ok) throw new Error("Não foi possível registrar o abastecimento.");
+      const abastecimentoCriado = await resposta.json();
+      recursoCriado = { url, id: String(abastecimentoCriado.id || abastecimentoCriado._id || "") };
+    }
+
+    if (despesa.manutencao) {
+      const url = "https://backend-frotas.onrender.com/api/manuPrev";
+      const resposta = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          caminhaoId: despesa.manutencao.caminhaoId,
+          data: despesa.data,
+          tipo: despesa.manutencao.tipo,
+          quilometragem: despesa.manutencao.quilometragem,
+          oficina: despesa.manutencao.oficina,
+          custo: despesa.valor,
+          proximaRevisao: despesa.manutencao.proximaRevisao,
+          observacoes: despesa.descricao,
+          status: "Concluída",
+        }),
+      });
+      if (!resposta.ok) throw new Error("Não foi possível registrar a manutenção.");
+      const manutencaoCriada = await resposta.json();
+      recursoCriado = { url, id: String(manutencaoCriada.id || manutencaoCriada._id || "") };
+    }
+
+    const { abastecimento, manutencao, ...dadosTransacao } = despesa;
+    const novaTransacao = {
+      id: Date.now(),
+      idViagem: viagem.id,
+      ...dadosTransacao,
+    };
+    const transacoesAtualizadas = [...(viagem.transacoes || []), novaTransacao];
+    const respostaTransacoes = await fetch(`https://backend-frotas.onrender.com/api/viagens/${viagem.id}/transacoes`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(transacoesAtualizadas),
     });
 
-    if (!response.ok) throw new Error("Erro ao salvar despesa");
+    if (!respostaTransacoes.ok) throw new Error("Não foi possível atualizar as despesas da viagem.");
 
-    const transacoesAtualizadasDoServidor = await response.json();
+    const transacoesAtualizadasDoServidor = await respostaTransacoes.json();
     setViagem({ ...viagem, transacoes: transacoesAtualizadasDoServidor });
-
     toast({
-      title: "Despesa adicionada com sucesso!",
+      title: despesa.categoriaDespesa === "Outra"
+        ? "Despesa adicionada com sucesso!"
+        : `${despesa.categoriaDespesa} e despesa da viagem registrados!`,
       status: "success",
       duration: 3000,
       isClosable: true,
     });
+    return true;
   } catch (err) {
+    let registroParcial = false;
+    if (recursoCriado?.id) {
+      try {
+        const respostaRollback = await fetch(`${recursoCriado.url}/${recursoCriado.id}`, { method: "DELETE" });
+        registroParcial = !respostaRollback.ok;
+      } catch {
+        registroParcial = true;
+      }
+    }
+
     toast({
       title: "Erro ao adicionar despesa",
+      description: registroParcial
+        ? "A viagem não foi atualizada e não foi possível desfazer o registro no outro módulo."
+        : err instanceof Error ? err.message : "Tente novamente.",
       status: "error",
-      duration: 3000,
+      duration: 5000,
       isClosable: true,
     });
+    return false;
   }
 };
 
@@ -855,7 +915,7 @@ return (
               </Flex>
             </CardHeader>
 
-            <CardBody p={0}>
+            <CardBody p={0} maxH="70vh" overflowY="auto">
               <Table variant="simple" size="sm">
                 <Thead bg="#f5f5f5">
                   <Tr>
@@ -871,7 +931,12 @@ return (
                   {viagem.transacoes.map((transacao) => (
                     <Tr key={transacao.id} _even={{ bg: "#f9f9f9" }} _hover={{ bg: "#f0f7ff" }}>
                       <Td borderColor="#e0e0e0" fontSize="13px" py={2}>{new Date(transacao.data).toLocaleDateString("pt-BR")}</Td>
-                      <Td borderColor="#e0e0e0" fontSize="13px" py={2}>{transacao.descricao}</Td>
+                      <Td borderColor="#e0e0e0" fontSize="13px" py={2}>
+                        <Text>{transacao.descricao}</Text>
+                        {transacao.categoriaDespesa && transacao.categoriaDespesa !== "Outra" && (
+                          <Text fontSize="xs" color="gray.500">{transacao.categoriaDespesa}</Text>
+                        )}
+                      </Td>
                       <Td borderColor="#e0e0e0" py={2}>
                         <Box
                           display="inline-block"
@@ -941,6 +1006,8 @@ return (
         isOpen={isModalNovaDespesaOpen}
         onClose={() => setIsModalNovaDespesaOpen(false)}
         onSalvar={handleSalvarDespesa}
+        viatura={viagem?.viatura}
+        odometro={viagem?.odometro}
       />
 
       <ModalNovaReceita
