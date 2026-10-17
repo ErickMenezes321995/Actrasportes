@@ -28,7 +28,7 @@ interface Viagem {
   status: string;
   cliente?: string;
   pesoCarga?: string;
-  valorMercadoria?: string;
+  valorMercadoria?: string | number;
   cte?: string;
   mdfe?: string;
   nfe?: string;
@@ -43,16 +43,49 @@ interface EditarViagemModalProps {
   onSalvar: (dadosEditados: Viagem) => void;
 }
 
+const formatValorMercadoria = (value?: string | number): string => {
+  if (value === undefined || value === null || value === "") return "";
+
+  const stringValue = String(value).trim();
+
+  const numericValue = stringValue.includes(",")
+    ? Number(stringValue.replace(/\./g, "").replace(",", ".").replace(/[^\d.-]/g, ""))
+    : Number(stringValue.replace(/[^\d.-]/g, ""));
+
+  if (!Number.isFinite(numericValue)) return stringValue;
+
+  return numericValue.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+};
+
+const normalizeValorMercadoria = (value?: string | number): string => {
+  if (value === undefined || value === null || value === "") return "";
+
+  const stringValue = String(value).trim();
+
+  return stringValue.includes(",") || stringValue.includes("R$")
+    ? stringValue.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".")
+    : stringValue;
+};
+
 const EditarViagemModal: React.FC<EditarViagemModalProps> = ({
   isOpen,
   onClose,
   viagem,
   onSalvar,
 }) => {
-  const [formData, setFormData] = useState<Viagem>(viagem);
+  const [formData, setFormData] = useState<Viagem>({
+    ...viagem,
+    valorMercadoria: formatValorMercadoria(viagem.valorMercadoria),
+  });
 
   useEffect(() => {
-    setFormData(viagem);
+    setFormData({
+      ...viagem,
+      valorMercadoria: formatValorMercadoria(viagem.valorMercadoria),
+    });
   }, [viagem]);
 
   const handleChange = (
@@ -93,7 +126,10 @@ const EditarViagemModal: React.FC<EditarViagemModalProps> = ({
   };
 
 const handleSalvar = () => {
-    onSalvar(formData);
+    onSalvar({
+      ...formData,
+      valorMercadoria: normalizeValorMercadoria(formData.valorMercadoria),
+    });
     onClose();
   };
 
