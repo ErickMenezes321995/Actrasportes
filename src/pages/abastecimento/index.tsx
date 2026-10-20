@@ -224,7 +224,7 @@ const formatarDataLocal = (dataString: string) => {
   }
 
   return (
-    <Box mt="80px" px={4}>
+    <Box>
       <Card 
         w="100%" 
         maxW="1200px" 

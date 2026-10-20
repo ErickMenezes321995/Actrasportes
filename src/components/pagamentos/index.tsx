@@ -280,43 +280,61 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} isCentered size="md">
-      <ModalOverlay />
-      <ModalContent maxW="500px">
-        <ModalHeader>
-          {step === 'plans' ? 'Escolha seu Plano' : `Pagamento - ${selectedPlan?.nome}`}
+      <ModalOverlay bg="rgba(12, 28, 41, .48)" backdropFilter="blur(4px)" />
+      <ModalContent maxW={step === 'plans' ? "540px" : "500px"} borderRadius="22px" overflow="hidden"
+        boxShadow="0 24px 72px rgba(16, 38, 58, .22)" mx={4}>
+        <ModalHeader px={7} pt={7} pb={4} borderBottom="1px solid #EDF1F5">
+          {step === 'plans' ? (
+            <>
+              <Badge colorScheme="teal" borderRadius="full" px={3} py={1} fontSize="10px" letterSpacing="1px">STRIX SOLUTIONS</Badge>
+              <Text mt={3} color="#1C344B" fontSize="2xl" fontWeight="700" letterSpacing="-.5px">Escolha seu plano</Text>
+              <Text mt={1} color="#7C8B9B" fontSize="sm" fontWeight="400">Reative seu acesso e continue usando a plataforma.</Text>
+            </>
+          ) : `Pagamento - ${selectedPlan?.nome}`}
         </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody pb={4}>
+        <ModalCloseButton top={5} right={5} borderRadius="full" />
+        <ModalBody px={7} py={5}>
           {step === 'plans' ? (
             <VStack spacing={4}>
+              <Box w="full" px={4} py={3} borderRadius="13px" bg="#F3F8F7" border="1px solid #E1EFED">
+                <Text color="#386D68" fontSize="sm" fontWeight="600">Sua assinatura venceu</Text>
+                <Text color="#718985" fontSize="xs" mt={1}>Escolha um plano para renovar o acesso da sua empresa.</Text>
+              </Box>
               {planos.map((plano) => (
-                <Box
-                  key={plano.id}
-                  p={4}
-                  border="2px solid"
-                  borderColor="gray.200"
-                  borderRadius="lg"
-                  w="100%"
-                  cursor="pointer"
-                  transition="all 0.3s"
-                  _hover={{ borderColor: "green.500", transform: "scale(1.02)" }}
+                <Box key={plano.id} w="full" p={5} bg="white" border="1px solid #DCE8E7"
+                  borderRadius="17px" cursor="pointer" role="button" tabIndex={0}
+                  aria-label={`Selecionar ${plano.nome} por ${formatarPreco(plano.valor)} por ${plano.periodo}`}
+                  transition="all .2s ease" boxShadow="0 8px 24px rgba(23, 63, 60, .06)"
+                  _hover={{ borderColor: "#69A9A2", transform: "translateY(-2px)", boxShadow: "0 14px 32px rgba(23, 63, 60, .12)" }}
+                  _focusVisible={{ outline: "2px solid #438C86", outlineOffset: "2px" }}
+                  onKeyDown={(evento) => {
+                    if (evento.key === "Enter" || evento.key === " ") {
+                      evento.preventDefault();
+                      setSelectedPlan(plano);
+                      setPaymentMethod('pix');
+                      setStep('payment');
+                    }
+                  }}
                   onClick={() => {
                     setSelectedPlan(plano);
                     setPaymentMethod('pix');
                     setStep('payment');
                   }}
                 >
-                  <HStack justify="space-between">
+                  <HStack justify="space-between" align="start" spacing={4}>
                     <Box>
-                      <Text fontWeight="bold" fontSize="lg">{plano.nome}</Text>
-                      <Text fontSize="sm" color="gray.500">{plano.descricao}</Text>
+                      <Badge colorScheme="teal" variant="subtle" borderRadius="full" px={2.5} py={1} mb={3}>PLANO DISPON&Iacute;VEL</Badge>
+                      <Text color="#203A50" fontWeight="700" fontSize="lg">{plano.nome}</Text>
+                      <Text mt={1} fontSize="sm" color="#7C8B9B">{plano.descricao}</Text>
                     </Box>
-                    <Box textAlign="right">
-                      <Text fontWeight="bold" fontSize="xl" color="green.500">
-                        {formatarPreco(plano.valor)}
-                      </Text>
-                      <Text fontSize="xs" color="gray.400">/{plano.periodo}</Text>
+                    <Box textAlign="right" flexShrink={0}>
+                      <Text color="#176D68" fontWeight="800" fontSize="xl">{formatarPreco(plano.valor)}</Text>
+                      <Text mt={1} fontSize="xs" color="#8593A1">/{plano.periodo}</Text>
                     </Box>
+                  </HStack>
+                  <HStack justify="space-between" mt={5} pt={4} borderTop="1px solid #EDF2F1" color="#287A73">
+                    <Text fontSize="sm" fontWeight="700">Selecionar este plano</Text>
+                    <Text fontSize="lg" aria-hidden="true">&rarr;</Text>
                   </HStack>
                 </Box>
               ))}

@@ -1,48 +1,17 @@
 import React, { useEffect, useState } from "react";
 import {
-  Box,
-  VStack,
-  Link,
-  Text,
-  Flex,
-  IconButton,
-  Collapse,
-  useDisclosure,
-  Drawer,
-  DrawerContent,
-  Icon,
-  Avatar,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  Image,
-  useColorModeValue,
-  Divider,
-  HStack,
-  Badge
+  Box, VStack, Link, Text, Flex, IconButton, Collapse, useDisclosure,
+  Drawer, DrawerContent, DrawerOverlay, DrawerCloseButton, Icon, Avatar,
+  Menu, MenuButton, MenuList, MenuItem, Image, HStack, Tooltip, Button,
 } from "@chakra-ui/react";
+import { HamburgerIcon, ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import {
-  HamburgerIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@chakra-ui/icons";
-import {
-  MdLocalShipping,
-  MdLocationOn,
-  MdPeople,
-  MdBuild,
-  MdRadioButtonChecked,
-  MdInvertColors,
-  MdLocalGasStation,
-  MdDriveEta,
-  MdAppRegistration,
-  MdSettings,
+  MdLocalShipping, MdLocationOn, MdPeople, MdBuild, MdRadioButtonChecked,
+  MdInvertColors, MdLocalGasStation, MdDriveEta, MdAppRegistration, MdSettings,
+  MdLogout, MdPersonOutline,
 } from "react-icons/md";
 import { IconType } from "react-icons";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
@@ -83,15 +52,9 @@ const Sidebar = ({ children }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const sidebarBg = useColorModeValue("#1E293B", "#0F172A");
-  const headerBg = useColorModeValue("#1E293B", "#0F172A");
-  const activeBg = useColorModeValue("#3B82F6", "#2563EB");
-  const hoverBg = useColorModeValue("#334155", "#1E293B");
-  const textColor = useColorModeValue("#E2E8F0", "#CBD5E1");
-  const activeTextColor = useColorModeValue("white", "white");
-  const borderColor = useColorModeValue("#334155", "#1E293B");
-  const accentColor = useColorModeValue("#3B82F6", "#60A5FA");
-  const badgeBg = useColorModeValue("#10B981", "#059669");
+  const sidebarBg = "#101E32";
+  const borderColor = "whiteAlpha.100";
+  const hoverBg = "whiteAlpha.100";
 
   useEffect(() => {
     const loadUserData = () => {
@@ -142,7 +105,7 @@ const Sidebar = ({ children }: SidebarProps) => {
       return () => unsubscribe();
     };
 
-    loadUserData();
+    const unsubscribe = loadUserData();
 
     const handleStorageChange = () => {
       const usuarioLogadoStr = localStorage.getItem("usuarioLogado");
@@ -177,6 +140,7 @@ const Sidebar = ({ children }: SidebarProps) => {
     }, 5000);
 
     return () => {
+      unsubscribe();
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
@@ -192,7 +156,7 @@ const Sidebar = ({ children }: SidebarProps) => {
   };
 
   const isActiveLink = (href: string) => {
-    return location.pathname === href;
+    return location.pathname.toLowerCase() === href.toLowerCase();
   };
 
   const handleLogout = () => {
@@ -231,386 +195,153 @@ const Sidebar = ({ children }: SidebarProps) => {
     { label: "Configuração", href: "/configuracao", icon: MdSettings },
   ];
 
-  const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
-    <Box
-      bg={sidebarBg}
-      color={textColor}
-      w={isMobile ? "full" : collapsed ? 16 : 64}
-      h="full"
-      borderRight="1px"
-      borderColor={borderColor}
-      transition="width 0.2s ease"
-      overflow="hidden"
-      position="relative"
-      boxShadow="lg"
-    >
-      {!isMobile && (
-        <Flex justify="flex-end" p={4} pb={2}>
-          <IconButton
-            icon={collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            aria-label="Toggle collapse"
-            size="sm"
-            onClick={toggleCollapse}
-            variant="ghost"
-            color={textColor}
-            _hover={{ bg: hoverBg }}
-          />
+  const allLinks = navItems.flatMap((item) => item.children || [item]);
+  const currentItem = allLinks.find((item) => item.href && isActiveLink(item.href));
+  const pageTitle = currentItem?.label || (
+    location.pathname.startsWith("/historico") ? "Histórico da viagem" :
+    location.pathname.startsWith("/rota") ? "Rota da viagem" :
+    location.pathname === "/perfil" ? "Meu perfil" :
+    location.pathname === "/relatorio-viagens" ? "Relatório de viagens" :
+    location.pathname === "/relatorio" ? "Relatórios" :
+    location.pathname === "/cadastro-usuario" ? "Cadastro de usuário" : "Gestão de frota"
+  );
+  const sidebarWidth = collapsed ? "88px" : "272px";
+
+  const renderSidebar = (isMobile = false) => {
+    const compact = collapsed && !isMobile;
+    return (
+      <Flex direction="column" h="full" bg={sidebarBg} color="#A9B8CF"
+        bgGradient="linear(to-b, #162840, #0C1728)" overflow="hidden">
+        <Flex h="88px" minH="88px" align="center" px={compact ? 4 : 6} gap={3}
+          borderBottom="1px solid" borderColor={borderColor}>
+          <Flex align="center" justify="center" bg="white" borderRadius="14px"
+            w={compact ? "56px" : "64px"} h="44px" flexShrink={0} p={2}>
+            <Image src="/assets/actransporte.png" alt="AC Transportes" maxH="32px" objectFit="contain" />
+          </Flex>
+          {!compact && <Box><Text color="white" fontSize="sm" fontWeight="800" letterSpacing="-.3px">AC Transportes</Text>
+            <Text fontSize="10px" letterSpacing="2px" color="#7F95B3" mt={1}>GESTÃO DE FROTA</Text></Box>}
         </Flex>
-      )}
-
-      <VStack align="start" spacing={1} p={2}>
-        {navItems.map(({ label, href, icon, children, badge, disabled }) => {
-          const hasChildren = !!children;
-          const isOpen = openSubmenus[label];
-          const isActive = href ? isActiveLink(href) : false;
-
-          return (
-            <Box key={label} w="full">
-              {hasChildren ? (
-                <Flex
-                  onClick={() => toggleSubmenu(label)}
-                  alignItems="center"
-                  px={3}
-                  py={2}
-                  borderRadius="lg"
-                  bg={isActive ? activeBg : "transparent"}
-                  _hover={{ bg: isActive ? activeBg : hoverBg }}
-                  justifyContent={collapsed && !isMobile ? "center" : "flex-start"}
-                  cursor="pointer"
-                  transition="all 0.2s"
-                  position="relative"
-                >
-                  <Icon
-                    as={icon as React.ElementType}
-                    boxSize={5}
-                    mr={collapsed && !isMobile ? 0 : 3}
-                    mx={collapsed && !isMobile ? "auto" : undefined}
-                    color={isActive ? activeTextColor : accentColor}
-                  />
-                  {(!collapsed || isMobile) && (
-                    <Flex align="center" w="full" justify="space-between">
-                      <Text 
-                        fontSize="sm" 
-                        fontWeight={isActive ? "medium" : "normal"}
-                        color={isActive ? activeTextColor : textColor}
-                      >
-                        {label}
-                      </Text>
-                      <Flex align="center">
-                        {badge && (
-                          <Badge 
-                            bg={badgeBg} 
-                            color="white" 
-                            fontSize="xs" 
-                            borderRadius="full" 
-                            px={2}
-                            mr={2}
-                          >
-                            {badge}
-                          </Badge>
-                        )}
-                        {isOpen ? (
-                          <ChevronUpIcon boxSize={3} />
-                        ) : (
-                          <ChevronDownIcon boxSize={3} />
-                        )}
-                      </Flex>
-                    </Flex>
-                  )}
-                </Flex>
-              ) : disabled ? (
-                <Flex
-                  alignItems="center"
-                  px={3}
-                  py={2}
-                  borderRadius="lg"
-                  justifyContent={collapsed && !isMobile ? "center" : "flex-start"}
-                  cursor="not-allowed"
-                  opacity={0.55}
-                  aria-disabled="true"
-                  role="button"
-                  title="Em breve"
-                >
-                  <Icon
-                    as={icon as React.ElementType}
-                    boxSize={5}
-                    mr={collapsed && !isMobile ? 0 : 3}
-                    mx={collapsed && !isMobile ? "auto" : undefined}
-                    color="gray.400"
-                  />
-                  {(!collapsed || isMobile) && (
-                    <Flex align="center" justify="space-between" w="full">
-                      <Text fontSize="sm" color="gray.400">{label}</Text>
-                      <Badge bg="gray.600" color="gray.200" fontSize="xs" borderRadius="full" px={2}>
-                        {badge}
-                      </Badge>
-                    </Flex>
-                  )}
-                </Flex>
-              ) : (
-                <Link
-                  href={href}
-                  display="flex"
-                  alignItems="center"
-                  px={3}
-                  py={2}
-                  borderRadius="lg"
-                  bg={isActive ? activeBg : "transparent"}
-                  _hover={{ 
-                    textDecoration: "none",
-                    bg: isActive ? activeBg : hoverBg 
-                  }}
-                  justifyContent={collapsed && !isMobile ? "center" : "flex-start"}
-                  position="relative"
-                >
-                  <Icon
-                    as={icon as React.ElementType}
-                    boxSize={5}
-                    mr={collapsed && !isMobile ? 0 : 3}
-                    mx={collapsed && !isMobile ? "auto" : undefined}
-                    color={isActive ? activeTextColor : accentColor}
-                  />
-                  {(!collapsed || isMobile) && (
-                    <Flex align="center" justify="space-between" w="full">
-                      <Text 
-                        fontSize="sm" 
-                        fontWeight={isActive ? "medium" : "normal"}
-                        color={isActive ? activeTextColor : textColor}
-                      >
-                        {label}
-                      </Text>
-                      {badge && (
-                        <Badge 
-                          bg={badgeBg} 
-                          color="white" 
-                          fontSize="xs" 
-                          borderRadius="full" 
-                          px={2}
-                        >
-                          {badge}
-                        </Badge>
-                      )}
-                    </Flex>
-                  )}
-                </Link>
-              )}
-
-              {hasChildren && (isOpen || isMobile) && (
-                <Collapse in={isOpen || isMobile} animateOpacity>
-                  <VStack align="start" pl={collapsed && !isMobile ? 0 : 8} spacing={1} mt={1}>
-                    {children!.map((child) => {
-                      const isChildActive = child.href ? isActiveLink(child.href) : false;
-                      return (
-                        <Link
-                          key={child.label}
-                          href={child.href}
-                          fontSize="sm"
-                          color={isChildActive ? activeTextColor : "gray.400"}
-                          display="flex"
-                          alignItems="center"
-                          w="full"
-                          _hover={{ 
-                            textDecoration: "none",
-                            color: activeTextColor, 
-                            bg: isChildActive ? activeBg : hoverBg 
-                          }}
-                          px={3}
-                          py={2}
-                          borderRadius="lg"
-                          bg={isChildActive ? activeBg : "transparent"}
-                          fontWeight={isChildActive ? "medium" : "normal"}
-                          transition="all 0.2s"
-                        >
-                          <Box w="4px" h="4px" borderRadius="full" bg={accentColor} mr={2} opacity={isChildActive ? 1 : 0.5} />
-                          <Icon as={child.icon as React.ElementType} boxSize={4} mr={2} opacity={0.8} />
-                          <Text>{child.label}</Text>
-                        </Link>
-                      );
+        <Box as="nav" aria-label="Navegação principal" flex="1" overflowY="auto" px={compact ? 3 : 4} py={6}
+          sx={{ scrollbarWidth: "thin", scrollbarColor: "#34445b transparent" }}>
+          <Text fontSize="10px" fontWeight="700" letterSpacing="2px" color="#7187A4"
+            px={3} mb={4} textAlign={compact ? "center" : "left"}>{compact ? "•••" : "NAVEGAÇÃO"}</Text>
+          <VStack align="stretch" spacing={2}>
+            {navItems.map((item) => {
+              const active = Boolean(item.href && isActiveLink(item.href)) || Boolean(item.children?.some((child) => child.href && isActiveLink(child.href)));
+              const expanded = openSubmenus[item.label] ?? active;
+              const content = <>
+                <Icon as={item.icon as React.ElementType} boxSize={5} flexShrink={0} color={active ? "#8CBFFF" : "#829AB9"} />
+                {!compact && <><Text flex="1" textAlign="left" fontSize="13px" fontWeight={active ? "600" : "500"}>{item.label}</Text>
+                  {item.children && <ChevronDownIcon transform={expanded ? "rotate(180deg)" : undefined} transition="transform .2s" />}
+                  {active && !item.children && <Box boxSize="5px" borderRadius="full" bg="#8CBFFF" />}</>}
+              </>;
+              const shared = {
+                display: "flex", alignItems: "center", gap: 3, w: "full", minH: "46px", px: 3,
+                borderRadius: "12px", color: active ? "white" : "#A9B8CF",
+                bg: active ? "rgba(86, 150, 238, .15)" : "transparent",
+                boxShadow: active ? "inset 0 0 0 1px rgba(132,182,255,.14)" : "none",
+                justifyContent: compact ? "center" : "flex-start",
+                transition: "background .2s, color .2s", _hover: { bg: hoverBg, color: "white", textDecoration: "none" },
+                _focusVisible: { outline: "2px solid #8CBFFF", outlineOffset: "2px" },
+              };
+              return <Box key={item.label}>
+                <Tooltip label={item.label} placement="right" isDisabled={!compact} hasArrow>
+                  {item.children ? <Button {...shared} variant="unstyled" aria-label={item.label}
+                    aria-expanded={!compact && expanded}
+                    onClick={() => { if (compact) { setCollapsed(false); setOpenSubmenus((prev) => ({ ...prev, [item.label]: true })); } else toggleSubmenu(item.label); }}>
+                    {content}</Button> : <Link {...shared} as={RouterLink} to={item.href}
+                      aria-label={item.label} aria-current={active ? "page" : undefined} onClick={onClose}>{content}</Link>}
+                </Tooltip>
+                {item.children && !compact && <Collapse in={expanded} animateOpacity>
+                  <VStack align="stretch" spacing={1} ml={5} pl={4} mt={2} mb={1} borderLeft="1px solid" borderColor="whiteAlpha.200">
+                    {item.children.map((child) => {
+                      const childActive = Boolean(child.href && isActiveLink(child.href));
+                      return <Link key={child.label} as={RouterLink} to={child.href} onClick={onClose}
+                        aria-current={childActive ? "page" : undefined} display="flex" alignItems="center" gap={2.5}
+                        px={3} py={2.5} borderRadius="10px" fontSize="12px" fontWeight={childActive ? "600" : "400"}
+                        color={childActive ? "#B9D7FF" : "#8FA3BD"} bg={childActive ? "whiteAlpha.100" : "transparent"}
+                        _hover={{ textDecoration: "none", color: "white", bg: hoverBg }}>
+                        <Icon as={child.icon as React.ElementType} boxSize={4} />{child.label}</Link>;
                     })}
                   </VStack>
-                </Collapse>
-              )}
-            </Box>
-          );
-        })}
-      </VStack>
-      
-      {!collapsed && !isMobile && (
-        <Box position="absolute" bottom="0" width="100%" p={4}>
-          <Divider borderColor={borderColor} mb={3} />
-          <Flex align="center" justify="center" direction="column">
-            <Text fontSize="xs" color="gray.500" textAlign="center">
-              Strix_Solutions
-            </Text>
-            <Text fontSize="xs" color="gray.500" textAlign="center">
-              © {new Date().getFullYear()} v2.1.0
-            </Text>
-          </Flex>
+                </Collapse>}
+              </Box>;
+            })}
+          </VStack>
         </Box>
-      )}
-    </Box>
-  );
-
-  const Header = () => (
-    <Box
-      as="header"
-      position="fixed"
-      top={0}
-      left={0}
-      right={0}
-      height="70px"
-      bg={headerBg}
-      color="white"
-      px={6}
-      display="flex"
-      alignItems="center"
-      justifyContent="space-between"
-      zIndex={15}
-      boxShadow="md"
-      borderBottom="1px"
-      borderColor={borderColor}
-    >
-      <Flex   
-      
-       align="center" gap={4}>
-        <IconButton
-          display={{ base: "flex", md: "none" }}
-          onClick={onOpen}
-          icon={<HamburgerIcon />}
-          aria-label="Abrir menu"
-          size="sm"
-          bg="transparent"
-          color="white"
-          _hover={{ bg: "blue.600" }}
-        />
-
-        <HStack spacing={4}>
-          <Image
-            src="/assets/actransporte.png"
-            alt="Logo da empresa"
-            height="45px"
-            objectFit="contain"
-          />
-          <Box 
-            h="30px" 
-            w="1px" 
-            bg="rgba(255,255,255,0.1)" 
-            display={{ base: "none", lg: "block" }} 
-          />
-          <Text 
-            fontSize="xl" 
-            fontWeight="bold" 
-            display={{ base: "none", lg: "block" }}
-            bgGradient="linear(to-r, blue.300, blue.400)"
-            bgClip="text"
-          >
-          Gestão de Frota
-          </Text>
-        </HStack>
-      </Flex>
-
-      <Flex align="center" gap={4}>
-        <Box textAlign="right" display={{ base: "none", md: "block" }}>
-          <Text fontSize="sm" fontWeight="medium" color="white">
-            {username || "Carregando..."}
-          </Text>
-          <Text fontSize="xs" color="gray.300">
-            {userCargo || "Usuário"}
-          </Text>
+        <Box p={compact ? 3 : 4} borderTop="1px solid" borderColor={borderColor}>
+          {!compact && <Flex align="center" gap={3} p={3} mb={3} borderRadius="12px" bg="whiteAlpha.50">
+            <Avatar name={username || "Usuário"} size="sm" bg="#284D78" color="#C9E0FF" />
+            <Box minW={0}><Text fontSize="12px" fontWeight="600" color="#E7EEF9" noOfLines={1}>{username || "Usuário"}</Text>
+              <Text fontSize="11px" color="#829AB9" noOfLines={1}>{userCargo || "Colaborador"}</Text></Box>
+          </Flex>}
+          {!isMobile && <Button onClick={toggleCollapse} variant="ghost" w="full" size="sm" color="#8FA3BD"
+            leftIcon={collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />} aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
+            _hover={{ bg: hoverBg, color: "white" }}>{!compact && "Recolher menu"}</Button>}
+          {!compact && <Text mt={3} fontSize="10px" textAlign="center" color="#647D9C">Strix Solutions · © {new Date().getFullYear()}</Text>}
         </Box>
-        <Menu>
-          <MenuButton>
-            <Flex align="center" gap={2}>
-              <Avatar 
-                name={username} 
-                size="sm" 
-                bg={accentColor} 
-                color="white" 
-                border={`2px solid ${borderColor}`}
-                src={username ? undefined : "/default-avatar.png"}
-              />
-              {/* <Box display={{ base: "none", md: "block" }}>
-                <Text fontSize="xs" fontWeight="medium" color="white">
-                  {username.split(' ')[0] || "Usuário"}
-                </Text>
-                <Text fontSize="xs" color="gray.300">
-                  {userCargo || "Cargo"}
-                </Text>
-              </Box> */}
-            </Flex>
-          </MenuButton>
-          <MenuList 
-            bg={sidebarBg} 
-            color={textColor} 
-            minW="160px" 
-            py={1} 
-            borderColor={borderColor}
-            boxShadow="xl"
-            zIndex="1000"
-          >
-            <Box px={3} py={2} borderBottom="1px" borderColor={borderColor}>
-              <Text fontSize="sm" fontWeight="medium">{username}</Text>
-              {/* <Text fontSize="xs" color="gray.400">{userCargo}</Text> */}
-               <Text fontSize="xs" color="gray.400">{userEmail || "@Email"}</Text>
-               
-            </Box>
-            <MenuItem
-              onClick={() => navigate("/perfil")}
-              bg={sidebarBg}
-              _hover={{ bg: hoverBg }}
-              fontSize="sm"
-              px={4}
-              py={2}
-            >
-              Meu Perfil
-            </MenuItem>
-            <MenuItem
-              onClick={handleLogout}
-              bg={sidebarBg}
-              _hover={{ bg: hoverBg }}
-              fontSize="sm"
-              px={4}
-              py={2}
-            >
-              Sair
-            </MenuItem>
-          </MenuList>
-        </Menu>
       </Flex>
-    </Box>
-  );
+    );
+  };
 
   return (
-    <Box minH="100vh" bg="gray.500">
-      <Header />
-      <Box
-        display={{ base: "none", md: "block" }}
-        pos="fixed"
-        left={0}
-        top="70px"
-        h="calc(100vh - 70px)"
-        zIndex={10}
-        boxShadow="xl"
-      >
-        <SidebarContent />
+    <Box minH="100vh" bg="#F3F6FA">
+      <Box as="aside" display={{ base: "none", md: "block" }} position="fixed" inset="0 auto 0 0"
+        w={sidebarWidth} transition="width .2s ease" zIndex={20} borderRight="1px solid #1E3048">
+        {renderSidebar()}
       </Box>
-
+      <Flex as="header" position="fixed" top={0} left={{ base: 0, md: sidebarWidth }} right={0}
+        h="88px" px={{ base: 4, lg: 8 }} align="center" justify="space-between" gap={3}
+        bg="rgba(255,255,255,.94)" backdropFilter="blur(16px)" borderBottom="1px solid #E5EBF3"
+        zIndex={15} transition="left .2s ease">
+        <HStack spacing={{ base: 3, lg: 4 }} minW={0}>
+          <IconButton display={{ base: "inline-flex", md: "none" }} onClick={onOpen}
+            icon={<HamburgerIcon />} aria-label="Abrir menu" variant="ghost" color="#314B6D" />
+          <Box minW={0}>
+            <HStack spacing={1.5} color="#8290A6" fontSize="11px" mb={1} display={{ base: "none", sm: "flex" }}>
+              <Text>Painel</Text><ChevronRightIcon boxSize={3} /><Text color="#526780">Gestão de frota</Text>
+            </HStack>
+            <Text as="h1" fontSize={{ base: "md", lg: "xl" }} fontWeight="700" letterSpacing="-.5px" color="#172B46" noOfLines={1}>{pageTitle}</Text>
+          </Box>
+        </HStack>
+        <HStack spacing={{ base: 2, lg: 5 }} flexShrink={0}>
+          <Box display={{ base: "none", xl: "block" }} textAlign="right" pr={5} borderRight="1px solid #E5EBF3">
+            <Text fontSize="11px" color="#8190A5" mb={1}>AC TRANSPORTES</Text>
+            <Text fontSize="12px" color="#455D7B" fontWeight="500">Gestão que move o seu negócio</Text>
+          </Box>
+          <Menu placement="bottom-end">
+            <MenuButton as={Button} variant="ghost" h="auto" p={2} borderRadius="14px"
+              aria-label="Abrir menu da conta" _hover={{ bg: "#F1F5FA" }} _active={{ bg: "#E9EFF7" }}>
+              <HStack spacing={3}>
+                <Avatar name={username || "Usuário"} size="sm" bg="#E7EFFB" color="#315F9B" border="1px solid #D8E5F5" />
+                <Box display={{ base: "none", lg: "block" }} textAlign="left" maxW="160px">
+                  <Text fontSize="12px" fontWeight="600" color="#243B58" noOfLines={1}>{username || "Usuário"}</Text>
+                  <Text mt={1} fontSize="11px" fontWeight="400" color="#8190A5" noOfLines={1}>{userCargo || "Colaborador"}</Text>
+                </Box>
+                <ChevronDownIcon color="#8190A5" boxSize={4} />
+              </HStack>
+            </MenuButton>
+            <MenuList p={2} borderRadius="16px" borderColor="#E5EBF3" boxShadow="0 16px 48px rgba(18,40,70,.14)" color="#243B58">
+              <Box px={3} py={3} mb={1} borderBottom="1px solid #EDF1F7">
+                <Text fontSize="sm" fontWeight="600">{username || "Minha conta"}</Text>
+                <Text fontSize="xs" color="#8190A5" mt={1} maxW="240px" noOfLines={1}>{userEmail || userCargo}</Text>
+              </Box>
+              <MenuItem icon={<Icon as={MdPersonOutline as React.ElementType} />} borderRadius="9px" fontSize="sm" onClick={() => navigate("/perfil")}>Meu perfil</MenuItem>
+              <MenuItem icon={<Icon as={MdSettings as React.ElementType} />} borderRadius="9px" fontSize="sm" onClick={() => navigate("/configuracao")}>Configurações</MenuItem>
+              <MenuItem icon={<Icon as={MdLogout as React.ElementType} />} borderRadius="9px" fontSize="sm" color="#C34E55" onClick={handleLogout}>Sair da conta</MenuItem>
+            </MenuList>
+          </Menu>
+        </HStack>
+      </Flex>
       <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
-        <DrawerContent maxW="64" p={0} bg={sidebarBg}>
-          <SidebarContent isMobile />
+        <DrawerOverlay bg="blackAlpha.500" backdropFilter="blur(3px)" />
+        <DrawerContent maxW="300px" bg={sidebarBg}>
+          <DrawerCloseButton color="white" top="92px" right={3} zIndex={1} />
+          {renderSidebar(true)}
         </DrawerContent>
       </Drawer>
-
-      <Box
-        ml={{ base: 0, md: collapsed ? 16 : 64 }}
-        pt="70px"
-        p={6}
-        transition="margin-left 0.2s ease"
-        minH="calc(100vh - 70px)"
-      >
-        <Box>
-          {children}
-        </Box>
+      <Box as="main" ml={{ base: 0, md: sidebarWidth }} pt="88px" minH="100vh" transition="margin-left .2s ease">
+        <Box p={{ base: 4, lg: 6 }}>{children}</Box>
       </Box>
     </Box>
   );

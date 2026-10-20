@@ -232,7 +232,7 @@ const GestaoFornecedores: React.FC = () => {
   }
 
   return (
-    <Box mt="80px" px={4} bg="transparent" minH="calc(100vh - 80px)" fontFamily="Arial, sans-serif">
+    <Box bg="transparent" fontFamily="Arial, sans-serif">
       <Card
         w="100%" 
         maxW="1200px" 

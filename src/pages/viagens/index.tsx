@@ -27,11 +27,8 @@ import { EditIcon, TriangleDownIcon, DeleteIcon, ViewIcon } from "@chakra-ui/ico
 import NovaViagemModal from "../../components/modalviagem/NovaViagemModal";
 import SelecionarMotoristaEquipamentoModal from "../../components/modalviagem/iniciarviagem";
 import EditarViagemModal from "../../components/modalviagem/EditarViagemModal";
-
 import axios from "axios";
-
 type StatusViagem = "Pendente" | "Em andamento" | "Concluída" | "Cancelada";
-
 interface Viagem {
   id: number;
   origem: string;
@@ -43,14 +40,12 @@ interface Viagem {
   status: StatusViagem;
   odometro?: number;
 }
-
 const TruckIcon = chakra("svg", {
   baseStyle: {
     boxSize: 6,
     color: "#15457b",
   },
 });
-
 function StatusTag({ status }: { status: StatusViagem }) {
   const statusConfig = {
     "Concluída": {
@@ -78,7 +73,6 @@ function StatusTag({ status }: { status: StatusViagem }) {
       icon: "✕"
     }
   };
-
   const { bgColor, color, borderColor, icon } = statusConfig[status];
   
   return (
@@ -89,11 +83,11 @@ function StatusTag({ status }: { status: StatusViagem }) {
       color={color}
       border="1px"
       borderColor={borderColor}
-      borderRadius="3px"
+      borderRadius="full"
       py={1}
-      px={2}
-      minW="100px"
-      fontSize="12px"
+      px={2.5}
+      minW="fit-content"
+      fontSize="11px"
       fontWeight="600"
       fontFamily="Arial, sans-serif"
     >
@@ -102,7 +96,6 @@ function StatusTag({ status }: { status: StatusViagem }) {
     </Flex>
   );
 }
-
 const formatarDataHoraLocal = (dataString: string) => {
   if (!dataString) return '-';
   
@@ -111,7 +104,6 @@ const formatarDataHoraLocal = (dataString: string) => {
   
   return data.toLocaleString('pt-BR');
 };
-
 // Componente de badge circular para contagens
 function CircularBadge({ count, colorScheme }: { count: number, colorScheme: string }) {
   const colorMap = {
@@ -121,9 +113,7 @@ function CircularBadge({ count, colorScheme }: { count: number, colorScheme: str
     red: { bg: "#a33d3d", color: "white" },
     gray: { bg: "#666666", color: "white" }
   };
-
   const { bg, color } = colorMap[colorScheme as keyof typeof colorMap] || colorMap.gray;
-
   return (
     <Flex
       align="center"
@@ -141,7 +131,6 @@ function CircularBadge({ count, colorScheme }: { count: number, colorScheme: str
     </Flex>
   );
 }
-
 // Componente de card para visualização mobile
 function ViagemCard({ viagem, onEdit, onView, onStart, onDelete }: { 
   viagem: Viagem; 
@@ -151,31 +140,24 @@ function ViagemCard({ viagem, onEdit, onView, onStart, onDelete }: {
   onDelete: () => void;
 }) {
   return (
-    <Box 
-      p={3} 
-      border="1px" 
-      borderColor="#d0d0d0" 
-      borderRadius="4px" 
-      mb={3}
-      bg="white"
-      boxShadow="0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)"
-    >
-      <Flex justify="space-between" align="start" mb={2}>
-        <Box>
-          <Text fontSize="13px" fontWeight="600" color="#15457b">{viagem.origem} → {viagem.destino}</Text>
-          <Text fontSize="12px" color="#666666" mt={1}>
+    <Box p={4} border="1px solid #E6ECF3" borderRadius="16px" mb={3} bg="white"
+      boxShadow="0 8px 22px rgba(24, 46, 75, .06)">
+      <Flex justify="space-between" align="start" mb={4} gap={3}>
+        <Box minW={0}>
+          <Text fontSize="sm" fontWeight="700" color="#203956" noOfLines={2}>{viagem.origem} → {viagem.destino}</Text>
+          <Text fontSize="12px" color="#718198" mt={2}>
             Motorista: {viagem.motorista || <i>Não atribuído</i>}
           </Text>
-          <Text fontSize="12px" color="#666666">
+          <Text fontSize="12px" color="#718198">
             Viatura: {viagem.viatura || <i>Não atribuído</i>}
           </Text>
         </Box>
         <StatusTag status={viagem.status} />
       </Flex>
       
-      <Flex justify="space-between" align="center" mt={2}>
+      <Flex justify="space-between" align="center" mt={3} pt={3} borderTop="1px solid #EDF1F6" gap={2}>
         <Box>
-          <Text fontSize="11px" color="#999999">Início: {viagem.dataInicio}</Text>
+          <Text fontSize="11px" color="#8290A5">Início: {viagem.dataInicio}</Text>
           <Text fontSize="11px" color="#999999">Término: {formatarDataHoraLocal(viagem.dataTermino)}</Text>
         </Box>
         <HStack spacing={1}>
@@ -186,7 +168,7 @@ function ViagemCard({ viagem, onEdit, onView, onStart, onDelete }: {
             color="#15457b"
             bg="transparent"
             border="1px solid #a3bde3"
-            borderRadius="3px"
+            borderRadius="8px"
             _hover={{ bg: "#dfeaf5" }}
             onClick={onView}
           />
@@ -197,7 +179,7 @@ function ViagemCard({ viagem, onEdit, onView, onStart, onDelete }: {
             color="#15457b"
             bg="transparent"
             border="1px solid #a3bde3"
-            borderRadius="3px"
+            borderRadius="8px"
             _hover={{ bg: "#dfeaf5" }}
             onClick={onEdit}
           />
@@ -209,7 +191,7 @@ function ViagemCard({ viagem, onEdit, onView, onStart, onDelete }: {
               color="#1f5c7a"
               bg="transparent"
               border="1px solid #9ec5d9"
-              borderRadius="3px"
+              borderRadius="8px"
               _hover={{ bg: "#e6f0f5" }}
               onClick={onStart}
             />
@@ -222,7 +204,7 @@ function ViagemCard({ viagem, onEdit, onView, onStart, onDelete }: {
               color="#a33d3d"
               bg="transparent"
               border="1px solid #e0a8a8"
-              borderRadius="3px"
+              borderRadius="8px"
               _hover={{ bg: "#f9e6e6" }}
               onClick={onDelete}
             />
@@ -232,7 +214,6 @@ function ViagemCard({ viagem, onEdit, onView, onStart, onDelete }: {
     </Box>
   );
 }
-
 const GestaoViagens: React.FC = () => {
   const [viagens, setViagens] = useState<Viagem[]>([]);
   const [viagemSelecionada, setViagemSelecionada] = useState<Viagem | null>(null);
@@ -241,30 +222,23 @@ const GestaoViagens: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   const toast = useToast();
-
   const {
     isOpen: isModalSelecionarOpen,
     onOpen: onModalSelecionarOpen,
     onClose: onModalSelecionarClose,
   } = useDisclosure();
-
   const {
     isOpen: isModalEditarOpen,
     onOpen: onModalEditarOpen,
     onClose: onModalEditarClose,
   } = useDisclosure();
-
-
   const isMobile = useBreakpointValue({ base: true, md: false });
-
-
   const statusCounts = {
     Pendente: viagens.filter(v => v.status === "Pendente").length,
     "Em andamento": viagens.filter(v => v.status === "Em andamento").length,
     Concluída: viagens.filter(v => v.status === "Concluída").length,
     Cancelada: viagens.filter(v => v.status === "Cancelada").length
   };
-
   useEffect(() => {
     const fetchViagens = async () => {
       try {
@@ -273,7 +247,6 @@ const GestaoViagens: React.FC = () => {
         const timeout = setTimeout(() => {
           setIsLoading(false);
         }, 20000);
-
         const res = await axios.get<Viagem[]>("https://backend-frotas.onrender.com/api/viagens");
         
         clearTimeout(timeout);
@@ -292,7 +265,6 @@ const GestaoViagens: React.FC = () => {
     };
     fetchViagens();
   }, [toast]);
-
   if (isLoading) {
     return (
       <Flex justify="center" align="center" h="100vh">
@@ -306,15 +278,12 @@ const GestaoViagens: React.FC = () => {
       </Flex>
     );
   }
-
   const iniciarViagem = async (id: number) => {
     const viagem = viagens.find((v) => v.id === id);
     if (!viagem) return;
-
     setViagemSelecionada(viagem);
     onModalSelecionarOpen();
   };
-
   const salvarMotoristaViatura = async (
     motorista: string,
     viatura: string,
@@ -322,7 +291,6 @@ const GestaoViagens: React.FC = () => {
     odometro: number
   ) => {
     if (!viagemSelecionada) return;
-
     try {
       const res = await axios.put(`https://backend-frotas.onrender.com/api/viagens/${viagemSelecionada.id}`, {
         motorista,
@@ -331,11 +299,9 @@ const GestaoViagens: React.FC = () => {
         odometro,
         status: "Em andamento",
       });
-
       setViagens((old): Viagem[] =>
         old.map((v) => (v.id === viagemSelecionada.id ? res.data as Viagem : v))
       );
-
       toast({
         title: "Viagem iniciada.",
         description: "Motorista, equipamento e odômetro atualizados.",
@@ -343,7 +309,6 @@ const GestaoViagens: React.FC = () => {
         duration: 3000,
         isClosable: true,
       });
-
       setViagemSelecionada(null);
     } catch {
       toast({
@@ -354,7 +319,6 @@ const GestaoViagens: React.FC = () => {
       });
     }
   };
-
   const deletarViagem = async (id: number) => {
     try {
       await axios.delete(`https://backend-frotas.onrender.com/api/viagens/${id}`);
@@ -375,43 +339,46 @@ const GestaoViagens: React.FC = () => {
       });
     }
   };
-
   const ordemStatus: StatusViagem[] = ["Pendente", "Em andamento", "Concluída", "Cancelada"];
   const viagensOrdenadas = [...viagens].sort(
     (a, b) => ordemStatus.indexOf(a.status) - ordemStatus.indexOf(b.status)
   );
-
   
-
   return (
-    <Box mt="90px" px={{ base: 2, md: 4 }} bg="transparent" minH="calc(100vh - 70px)" fontFamily="Arial, sans-serif">
-      <Card 
-        w="100%" 
-        maxW="1200px" 
+    <Box w="full" maxW="1440px" mx="auto" px={{ base: 0, xl: 2 }} bg="transparent" fontFamily="Arial, sans-serif">
+      <Card
+        maxW="1320px"
+        w="full"
         mx="auto" 
-        boxShadow="0 2px 8px rgba(0,0,0,0.15)" 
-        borderRadius="4px" 
-        border="1px solid #a3bde3"
+        boxShadow="0 18px 48px rgba(25, 48, 78, .08)"
+        borderRadius="20px"
+        border="1px solid #E4EAF2"
+        overflow="hidden"
         p={0}
       >
         <CardHeader
-         bg="#dfeaf5" 
-          borderBottom="1px solid #a3bde3" 
-          py={3} 
-          px={4}
-          borderRadius="4px 4px 0 0"
+          bg="white"
+          borderBottom="1px solid #E9EEF5"
+          py={{ base: 5, md: 6 }}
+          px={{ base: 4, md: 7 }}
         >
           <Flex justify="space-between" align="center" direction={{ base: "column", md: "row" }} gap={3}>
-            <Flex align="center" gap={3}>
-              <TruckIcon viewBox="0 0 640 512" fill="currentColor">
-                <path d="M624 352h-16V275.1c0-16.9-6.7-33.1-18.7-45.2L494.1 139.7c-12-12-28.3-18.7-45.2-18.7H400V80c0-26.5-21.5-48-48-48H48C21.5 32 0 53.5 0 80v272c0 26.5 21.5 48 48 48h16c0 35.3 28.7 64 64 64s64-28.7 64-64h256c0 35.3 28.7 64 64 64s64-28.7 64-64h16c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zM112 416c-17.6 0-32-14.4-32-32s14.4-32 32-32 32 14.4 32 32-14.4 32-32 32zm352 0c-17.6 0-32-14.4-32-32s14.4-32 32-32 32 14.4 32 32-14.4 32-32 32zm80-96h-80V160h45.3L544 198.7V320z" />
-              </TruckIcon>
-              <Heading size={{ base: "md", md: "lg" }} color="#15457b" fontWeight="600" fontFamily="Arial, sans-serif">
-                Gestão de Viagens
-              </Heading>
+            <Flex align="center" gap={4}>
+              <Flex align="center" justify="center" boxSize={{ base: "44px", md: "50px" }} flexShrink={0}
+                borderRadius="15px" bg="#EEF4FC" color="#315F9B">
+                <TruckIcon viewBox="0 0 640 512" fill="currentColor">
+                  <path d="M624 352h-16V275.1c0-16.9-6.7-33.1-18.7-45.2L494.1 139.7c-12-12-28.3-18.7-45.2-18.7H400V80c0-26.5-21.5-48-48-48H48C21.5 32 0 53.5 0 80v272c0 26.5 21.5 48 48 48h16c0 35.3 28.7 64 64 64s64-28.7 64-64h256c0 35.3 28.7 64 64 64s64-28.7 64-64h16c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zM112 416c-17.6 0-32-14.4-32-32s14.4-32 32-32 32 14.4 32 32-14.4 32-32 32zm352 0c-17.6 0-32-14.4-32-32s14.4-32 32-32 32 14.4 32 32-14.4 32-32 32zm80-96h-80V160h45.3L544 198.7V320z" />
+                </TruckIcon>
+              </Flex>
+              <Box>
+                <Heading size={{ base: "md", md: "lg" }} color="#1D3553" fontWeight="700" fontFamily="Arial, sans-serif" letterSpacing="-.5px">
+                  Gest&#227;o de Viagens
+                </Heading>
+                <Text mt={1} fontSize="sm" color="#8290A5">Acompanhe rotas, motoristas e status da opera&#231;&#227;o</Text>
+              </Box>
             </Flex>
             <NovaViagemModal
-              triggerText="Nova Viagem"
+              triggerText="Nova viagem"
               onSalvar={async (novaViagem) => {
                 try {
                   const res = await axios.post("https://backend-frotas.onrender.com/api/viagens", {
@@ -419,7 +386,6 @@ const GestaoViagens: React.FC = () => {
                     status: "Pendente",
                     transacoes: [],
                   });
-
                   setViagens((prev): Viagem[] => [...prev, res.data as Viagem]);
                 } catch {
                   toast({
@@ -434,60 +400,55 @@ const GestaoViagens: React.FC = () => {
           </Flex>
           
           {/* Barra de status com contadores */}
-        <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={0} mt={3} gap={0}>
-          <Flex align="center" justify="center" borderRight="1px solid #e0e0e0" py={1}>
-            <StatusTag status="Pendente" />
-            <CircularBadge count={statusCounts.Pendente} colorScheme="orange" />
+        <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={{ base: 2, md: 3 }} mt={5}>
+          <Flex align="center" justify="space-between" gap={2} bg="#FFF8ED" border="1px solid #F5E8D3" borderRadius="14px" px={{ base: 2.5, sm: 3.5 }} py={3}>
+            <StatusTag status="Pendente" /><CircularBadge count={statusCounts.Pendente} colorScheme="orange" />
           </Flex>
-          <Flex align="center" justify="center" borderRight="1px solid #e0e0e0" py={1}>
-            <StatusTag status="Em andamento" />
-            <CircularBadge count={statusCounts["Em andamento"]} colorScheme="blue" />
+          <Flex align="center" justify="space-between" gap={2} bg="#EFF7FC" border="1px solid #DDEBF5" borderRadius="14px" px={{ base: 2.5, sm: 3.5 }} py={3}>
+            <StatusTag status="Em andamento" /><CircularBadge count={statusCounts["Em andamento"]} colorScheme="blue" />
           </Flex>
-          <Flex align="center" justify="center" borderRight="1px solid #e0e0e0" py={1}>
-            <StatusTag status="Concluída" />
-            <CircularBadge count={statusCounts.Concluída} colorScheme="green" />
+          <Flex align="center" justify="space-between" gap={2} bg="#F0F8F2" border="1px solid #DCEEE0" borderRadius="14px" px={{ base: 2.5, sm: 3.5 }} py={3}>
+            <StatusTag status="Concluída" /><CircularBadge count={statusCounts["Concluída"]} colorScheme="green" />
           </Flex>
-          <Flex align="center" justify="center" py={1}>
-            <StatusTag status="Cancelada" />
-            <CircularBadge count={statusCounts.Cancelada} colorScheme="red" />
+          <Flex align="center" justify="space-between" gap={2} bg="#FDF2F2" border="1px solid #F3DFDF" borderRadius="14px" px={{ base: 2.5, sm: 3.5 }} py={3}>
+            <StatusTag status="Cancelada" /><CircularBadge count={statusCounts.Cancelada} colorScheme="red" />
           </Flex>
         </SimpleGrid>
         </CardHeader>
-
         <CardBody
-          maxH={{ base: "calc(100vh - 330px)", md: "calc(100vh - 250px)" }}
+          maxH={{ base: "calc(100vh - 320px)", md: "calc(100vh - 275px)" }}
           overflowX="auto"
           overflowY="auto"
-          px={0}
+          px={{ base: 2, md: 0 }}
           fontFamily="Arial, sans-serif"
         >
           {!isMobile ? (
-            <Table variant="simple" size="sm" fontFamily="Arial, sans-serif">
-              <Thead bg="#f5f5f5">
+            <Table variant="simple" size="sm" w="full" minW="1040px" fontFamily="Arial, sans-serif" layout="fixed">
+              <Thead bg="#F7F9FC">
                 <Tr>
-                  <Th borderColor="#e0e0e0" color="#666666" fontWeight="600" fontSize="12px" fontFamily="Arial, sans-serif" py={2}>Origem</Th>
-                  <Th borderColor="#e0e0e0" color="#666666" fontWeight="600" fontSize="12px" fontFamily="Arial, sans-serif" py={2}>Destino</Th>
-                  <Th borderColor="#e0e0e0" color="#666666" fontWeight="600" fontSize="12px" fontFamily="Arial, sans-serif" py={2}>Motorista</Th>
-                  <Th borderColor="#e0e0e0" color="#666666" fontWeight="600" fontSize="12px" fontFamily="Arial, sans-serif" py={2}>Viatura</Th>
-                  <Th borderColor="#e0e0e0" color="#666666" fontWeight="600" fontSize="12px" fontFamily="Arial, sans-serif" py={2}>Início</Th>
-                  <Th borderColor="#e0e0e0" color="#666666" fontWeight="600" fontSize="12px" fontFamily="Arial, sans-serif" py={2}>Término</Th>
-                  <Th borderColor="#e0e0e0" color="#666666" fontWeight="600" fontSize="12px" fontFamily="Arial, sans-serif" py={2}>Status</Th>
-                  <Th borderColor="#e0e0e0" color="#666666" fontWeight="600" fontSize="12px" fontFamily="Arial, sans-serif" py={2}>Ações</Th>
+                  <Th borderColor="#EDF1F6" color="#8290A5" fontWeight="700" fontSize="10px" letterSpacing=".8px" textTransform="uppercase" fontFamily="Arial, sans-serif" py={3.5}>Origem</Th>
+                  <Th borderColor="#EDF1F6" color="#8290A5" fontWeight="700" fontSize="10px" letterSpacing=".8px" textTransform="uppercase" fontFamily="Arial, sans-serif" py={3.5}>Destino</Th>
+                  <Th borderColor="#EDF1F6" color="#8290A5" fontWeight="700" fontSize="10px" letterSpacing=".8px" textTransform="uppercase" fontFamily="Arial, sans-serif" py={3.5}>Motorista</Th>
+                  <Th borderColor="#EDF1F6" color="#8290A5" fontWeight="700" fontSize="10px" letterSpacing=".8px" textTransform="uppercase" fontFamily="Arial, sans-serif" py={3.5}>Viatura</Th>
+                  <Th borderColor="#EDF1F6" color="#8290A5" fontWeight="700" fontSize="10px" letterSpacing=".8px" textTransform="uppercase" fontFamily="Arial, sans-serif" py={3.5}>Início</Th>
+                  <Th borderColor="#EDF1F6" color="#8290A5" fontWeight="700" fontSize="10px" letterSpacing=".8px" textTransform="uppercase" fontFamily="Arial, sans-serif" py={3.5}>Término</Th>
+                  <Th borderColor="#EDF1F6" color="#8290A5" fontWeight="700" fontSize="10px" letterSpacing=".8px" textTransform="uppercase" fontFamily="Arial, sans-serif" py={3.5}>Status</Th>
+                  <Th borderColor="#EDF1F6" color="#8290A5" fontWeight="700" fontSize="10px" letterSpacing=".8px" textTransform="uppercase" fontFamily="Arial, sans-serif" py={3.5}>Ações</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {viagensOrdenadas.map((viagem) => (
-                  <Tr key={viagem.id} _hover={{ bg: "#f0f7ff" }} fontFamily="Arial, sans-serif">
-                    <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{viagem.origem}</Td>
-                    <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{viagem.destino}</Td>
-                    <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{viagem.motorista || <i>Não atribuído</i>}</Td>
-                    <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{viagem.viatura || <i>Não atribuído</i>}</Td>
-                    <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{viagem.dataInicio}</Td>
-                    <Td borderColor="#e0e0e0" fontWeight="500" fontSize="13px" py={2}>{formatarDataHoraLocal(viagem.dataTermino)}</Td>
-                    <Td borderColor="#e0e0e0" py={2}>
+                  <Tr key={viagem.id} _hover={{ bg: "#F8FAFD" }} transition="background .15s" fontFamily="Arial, sans-serif">
+                    <Td borderColor="#EDF1F6" fontWeight="500" color="#405570" fontSize="13px" py={3.5}>{viagem.origem}</Td>
+                    <Td borderColor="#EDF1F6" fontWeight="500" color="#405570" fontSize="13px" py={3.5}>{viagem.destino}</Td>
+                    <Td borderColor="#EDF1F6" fontWeight="500" color="#405570" fontSize="13px" py={3.5}>{viagem.motorista || <i>Não atribuído</i>}</Td>
+                    <Td borderColor="#EDF1F6" fontWeight="500" color="#405570" fontSize="13px" py={3.5}>{viagem.viatura || <i>Não atribuído</i>}</Td>
+                    <Td borderColor="#EDF1F6" fontWeight="500" color="#405570" fontSize="13px" py={3.5}>{viagem.dataInicio}</Td>
+                    <Td borderColor="#EDF1F6" fontWeight="500" color="#405570" fontSize="13px" py={3.5}>{formatarDataHoraLocal(viagem.dataTermino)}</Td>
+                    <Td borderColor="#EDF1F6" py={2}>
                       <StatusTag status={viagem.status} />
                     </Td>
-                    <Td borderColor="#e0e0e0" py={2}>
+                    <Td borderColor="#EDF1F6" py={2}>
                       <Flex gap={1}>
                         <IconButton
                           aria-label="Visualizar"
@@ -496,7 +457,7 @@ const GestaoViagens: React.FC = () => {
                           color="#15457b"
                           bg="transparent"
                           border="1px solid #a3bde3"
-                          borderRadius="3px"
+                          borderRadius="8px"
                           _hover={{ bg: "#dfeaf5" }}
                           onClick={() => {
                             navigate(`/historico/${viagem.id}`);
@@ -509,7 +470,7 @@ const GestaoViagens: React.FC = () => {
                           color="#15457b"
                           bg="transparent"
                           border="1px solid #a3bde3"
-                          borderRadius="3px"
+                          borderRadius="8px"
                           _hover={{ bg: "#dfeaf5" }}
                           onClick={() => {
                             setViagemParaEditar(viagem);
@@ -523,7 +484,7 @@ const GestaoViagens: React.FC = () => {
                           color="#1f5c7a"
                           bg="transparent"
                           border="1px solid #9ec5d9"
-                          borderRadius="3px"
+                          borderRadius="8px"
                           _hover={{ bg: "#e6f0f5" }}
                           onClick={() => iniciarViagem(viagem.id)}
                           visibility={viagem.status === "Pendente" ? "visible" : "hidden"}
@@ -535,7 +496,7 @@ const GestaoViagens: React.FC = () => {
                           color="#a33d3d"
                           bg="transparent"
                           border="1px solid #e0a8a8"
-                          borderRadius="3px"
+                          borderRadius="8px"
                           _hover={{ bg: "#f9e6e6" }}
                           onClick={() => deletarViagem(viagem.id)}
                           visibility={
@@ -551,7 +512,7 @@ const GestaoViagens: React.FC = () => {
               </Tbody>
             </Table>
           ) : (
-            <Box>
+            <Box px={3} py={3}>
               {viagensOrdenadas.map((viagem) => (
                 <ViagemCard
                   key={viagem.id}
@@ -569,7 +530,6 @@ const GestaoViagens: React.FC = () => {
           )}
         </CardBody>
       </Card>
-
       {viagemSelecionada && (
         <SelecionarMotoristaEquipamentoModal
           isOpen={isModalSelecionarOpen}
@@ -584,7 +544,6 @@ const GestaoViagens: React.FC = () => {
           odometroAtual={viagemSelecionada.odometro || 0}
         />
       )}
-
       {viagemParaEditar && (
         <EditarViagemModal
           isOpen={isModalEditarOpen}
@@ -619,5 +578,4 @@ const GestaoViagens: React.FC = () => {
     </Box>
   );
 };
-
 export default GestaoViagens;

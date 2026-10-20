@@ -25,7 +25,7 @@ const Configuracao: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <Box mt="80px" px={{ base: 0, md: 4 }}>
+    <Box>
     <Box
       maxW="1200px"
       mx="auto"

@@ -8,6 +8,8 @@ import {
   Input,
   InputGroup,
   InputRightElement,
+  Image,
+  Link,
   Stack,
   Text,
   Spinner,
@@ -103,7 +105,7 @@ const LoginPage = () => {
           } else {
            
             localStorage.removeItem("usuarioLogado");
-            setErro("Sua conta está inativa. Entre em contato com o suporte.");
+            setErro("Sua conta estÃƒÂ¡ inativa. Entre em contato com o suporte.");
             setShowPaymentLink(false);
           }
         } catch (error) {
@@ -135,7 +137,7 @@ const LoginPage = () => {
       const userData = await getUserById(firebaseUser.uid);
 
       if (!userData) {
-        setErro("Usuário não encontrado no sistema. Contate o administrador.");
+        setErro("UsuÃƒÂ¡rio nÃƒÂ£o encontrado no sistema. Contate o administrador.");
         await auth.signOut();
         setIsLoading(false);
         return;
@@ -150,7 +152,7 @@ const LoginPage = () => {
           cpf: userData.cpf
         });
         
-        setErro("Sua assinatura está vencida.");
+        setErro("Sua assinatura estÃƒÂ¡ vencida.");
         setShowPaymentLink(true);
         
         await auth.signOut();
@@ -179,17 +181,17 @@ const LoginPage = () => {
       console.error("Erro no login:", error);
       
       if (error.code === "permission-denied") {
-        setErro("Erro de permissão. Verifique as regras do Firestore.");
+        setErro("Erro de permissÃƒÂ£o. Verifique as regras do Firestore.");
       } else {
         switch (error.code) {
           case "auth/invalid-email":
-            setErro("E-mail inválido");
+            setErro("E-mail invÃƒÂ¡lido");
             break;
           case "auth/user-disabled":
-            setErro("Usuário desativado no sistema");
+            setErro("UsuÃƒÂ¡rio desativado no sistema");
             break;
           case "auth/user-not-found":
-            setErro("Usuário não encontrado");
+            setErro("UsuÃƒÂ¡rio nÃƒÂ£o encontrado");
             break;
           case "auth/wrong-password":
             setErro("Senha incorreta");
@@ -217,7 +219,7 @@ const LoginPage = () => {
 
     try {
       await sendPasswordResetEmail(auth, resetEmail);
-      setResetSuccess("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
+      setResetSuccess("E-mail de recuperaÃƒÂ§ÃƒÂ£o enviado! Verifique sua caixa de entrada.");
       setResetError("");
       
       toast({
@@ -236,17 +238,17 @@ const LoginPage = () => {
       }, 3000);
       
     } catch (error: any) {
-      console.error("Erro ao enviar e-mail de recuperação:", error);
+      console.error("Erro ao enviar e-mail de recuperaÃƒÂ§ÃƒÂ£o:", error);
       
       switch (error.code) {
         case "auth/invalid-email":
-          setResetError("E-mail inválido");
+          setResetError("E-mail invÃƒÂ¡lido");
           break;
         case "auth/user-not-found":
           setResetError("Nenhuma conta encontrada com este e-mail");
           break;
         default:
-          setResetError("Erro ao enviar e-mail de recuperação. Tente novamente.");
+          setResetError("Erro ao enviar e-mail de recuperaÃƒÂ§ÃƒÂ£o. Tente novamente.");
       }
     } finally {
       setIsResetLoading(false);
@@ -258,170 +260,195 @@ const LoginPage = () => {
   return (
     <>
       {isLoading && <FullScreenLoading />}
-      <Flex
-        minH="100vh"
-        align="center"
-        justify="center"
-        bgImage="url('https://mlqt0se4pk9p.i.optimole.com/q:85/https://www.autodata.com.br/wordpress/wp-content/uploads//2023/05/0d6bffd3a0eecc6d6ef08e787b9c470c-1-scaled.jpeg')"
-        bgPosition="center"
-        bgRepeat="no-repeat"
-        bgSize="cover"
-      >
-        <Box
-          bg="rgba(255, 255, 255, 0.95)"
-          p={8}
-          borderRadius="lg"
-          boxShadow="2xl"
-          maxW="lg"
-          w="100%"
-          opacity={isLoading ? 0.5 : 1}
-          pointerEvents={isLoading ? "none" : "auto"}
-        >
-          <Stack spacing={6} align="center" mb={4}>
-            <Heading fontSize="3xl" textAlign="center" color="teal.600">
-              Sistema de Gestão de Frota
+      <Flex minH="100vh" bg="#F4F7FA" opacity={isLoading ? 0.5 : 1}
+        pointerEvents={isLoading ? "none" : "auto"}>
+        <Box display={{ base: "none", lg: "flex" }} position="relative" overflow="hidden"
+          flex="1.08" minH="100vh" alignItems="stretch" justifyContent="space-between" flexDirection="column" p={{ lg: 10, xl: 16 }} color="white"
+          bgImage="linear-gradient(135deg, rgba(7, 25, 34, .93) 0%, rgba(8, 42, 51, .78) 55%, rgba(8, 35, 48, .55) 100%), url('https://mlqt0se4pk9p.i.optimole.com/q:85/https://www.autodata.com.br/wordpress/wp-content/uploads//2023/05/0d6bffd3a0eecc6d6ef08e787b9c470c-1-scaled.jpeg')"
+          bgPosition="center" bgSize="cover">
+          <Box position="absolute" top="-130px" right="-130px" boxSize="420px" borderRadius="full"
+            border="1px solid rgba(115, 226, 214, .16)" />
+          <Box position="absolute" top="-75px" right="-75px" boxSize="310px" borderRadius="full"
+            border="1px solid rgba(115, 226, 214, .12)" />
+          <Flex align="center" gap={3} position="relative">
+            <Flex align="center" justify="center" boxSize="48px" borderRadius="14px" bg="#38BDB0" color="#092C32" fontSize="2xl" fontWeight="800" boxShadow="0 8px 28px rgba(56,189,176,.24)">S</Flex>
+            <Box>
+              <Text color="white" fontSize="md" fontWeight="800" letterSpacing="1.8px">STRIX</Text>
+              <Text color="whiteAlpha.700" fontSize="10px" letterSpacing="3px">SOLUTIONS</Text>
+            </Box>
+          </Flex>
+          <Box position="relative" maxW="620px">
+            <Text color="#76D8CD" fontSize="xs" fontWeight="700" letterSpacing="3px" mb={4}>GEST&#195;O INTELIGENTE DE FROTA</Text>
+            <Heading fontSize={{ lg: "4xl", xl: "5xl" }} lineHeight="1.12" letterSpacing="-1.4px" fontWeight="700">
+              Sua opera&#231;&#227;o em movimento, com clareza e controle.
             </Heading>
-            <Text fontSize="lg" color="gray.600">
-              Acesse sua conta para continuar
+            <Text mt={5} maxW="500px" color="whiteAlpha.800" fontSize="md" lineHeight="1.8">
+              Acompanhe viagens, equipes e resultados em um s&#243; lugar. Entre para acessar o painel da sua frota.
             </Text>
-          </Stack>
-
-          <Stack spacing={4}>
-            <FormControl id="email" isRequired>
-              <FormLabel>E-mail</FormLabel>
-              <Input
-                type="email"
-                placeholder="usuario@empresa.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                isDisabled={isLoading}
-                size="lg"
-              />
-            </FormControl>
-           
-            <FormControl id="senha" isRequired>
-              <FormLabel>Senha</FormLabel>
-              <InputGroup>
-                <Input
-                  type={showSenha ? "text" : "password"}
-                  placeholder="********"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  isDisabled={isLoading}
-                  size="lg"
-                />
-                <InputRightElement width="3rem" height="full">
-                  <Button
-                    h="1.5rem"
-                    size="sm"
-                    onClick={toggleShowSenha}
-                    variant="ghost"
-                    isDisabled={isLoading}
-                  >
-                    {showSenha ? <ViewOffIcon /> : <ViewIcon />}
-                  </Button>
-                </InputRightElement>
-              </InputGroup>
-            </FormControl>
-
-            {erro && (
-              <Box textAlign="center">
-                <Text color="red.500" fontSize="sm" fontWeight="medium" mb={showPaymentLink ? 2 : 0}>
-                  {erro}
-                </Text>
-                {showPaymentLink && (
-                  <Button
-                    variant="link"
-                    color="teal.500"
-                    onClick={handleOpenPaymentModal}
-                    fontWeight="bold"
-                    fontSize="sm"
-                  >
-                    Clique aqui para renovar sua assinatura
-                  </Button>
-                )}
-              </Box>
-            )}
-
-            <Stack spacing={6} pt={4}>
-              <Button
-                bg="teal.500"
-                color="white"
-                _hover={{ bg: "teal.600" }}
-                _active={{ bg: "teal.700" }}
-                onClick={handleLogin}
-                width="100%"
-                isLoading={isLoading}
-                loadingText="Entrando"
-                size="lg"
-              >
-                Entrar
-              </Button>
-
-              <Button
-                variant="link"
-                color="teal.500"
-                _hover={{ textDecoration: "none", color: "teal.600" }}
-                onClick={onResetOpen}
-                isDisabled={isLoading}
-              >
-                Esqueci minha senha
-              </Button>
-            </Stack>
-          </Stack>
-
-          <Text fontSize="xs" color="gray.500" textAlign="center" mt={6}>
-            © {new Date().getFullYear()} Todos os direitos reservados • Strix_Solutions
-          </Text>
+            <Flex align="center" gap={3} mt={12} color="whiteAlpha.700" fontSize="xs">
+              <Box w="28px" h="1px" bg="#76D8CD" />
+              <Text>Plataforma de gest&#227;o desenvolvida pela Strix Solutions</Text>
+            </Flex>
+          </Box>
         </Box>
+
+        <Flex flex=".92" minH="100vh" align="center" justify="center" px={{ base: 5, sm: 8, xl: 14 }} py={10} bg="white">
+          <Box w="full" maxW="430px" opacity={isLoading ? 0.5 : 1}>
+            <Flex display={{ base: "flex", lg: "none" }} align="center" justify="center" gap={3} mb={10}>
+              <Flex align="center" justify="center" boxSize="44px" borderRadius="13px" bg="#176D68" color="white" fontSize="2xl" fontWeight="800">S</Flex>
+              <Box textAlign="left">
+                <Text color="#172B3D" fontSize="sm" fontWeight="800" letterSpacing="1.5px">STRIX</Text>
+                <Text color="#718198" fontSize="10px" letterSpacing="2.5px">SOLUTIONS</Text>
+              </Box>
+            </Flex>
+            <Flex align="center" justify="space-between" gap={3} mb={5}>
+              <Text color="#438C86" fontSize="xs" fontWeight="700" letterSpacing="1.5px">PLATAFORMA STRIX SOLUTIONS</Text>
+              <Flex align="center" gap={2} px={3} py={1.5} borderRadius="full" bg="#F2F7F7" border="1px solid #E2EEEE">
+                <Box boxSize="6px" borderRadius="full" bg="#438C86" />
+                <Text color="#52716F" fontSize="10px" fontWeight="700" whiteSpace="nowrap">AC Transportes</Text>
+              </Flex>
+            </Flex>
+            <Heading fontSize={{ base: "2xl", md: "3xl" }} color="#172B3D" letterSpacing="-.8px" fontWeight="700">
+              Bem-vindo de volta
+            </Heading>
+            <Text mt={2} mb={8} color="#7A8999" fontSize="sm">Entre na plataforma para continuar</Text>
+
+            <Stack spacing={5}>
+              <FormControl id="email" isRequired>
+                <FormLabel color="#34475B" fontSize="sm" fontWeight="600" mb={2}>E-mail</FormLabel>
+                <Input type="email" placeholder="usuario@empresa.com" value={email}
+                  onChange={(e) => setEmail(e.target.value)} isDisabled={isLoading} size="lg"
+                  borderRadius="12px" borderColor="#DCE4EC" bg="#FBFCFD" fontSize="sm"
+                  _hover={{ borderColor: "#B8C7D6" }} _focusVisible={{ borderColor: "#438C86", boxShadow: "0 0 0 1px #438C86", bg: "white" }} />
+              </FormControl>
+
+              <FormControl id="senha" isRequired>
+                <FormLabel color="#34475B" fontSize="sm" fontWeight="600" mb={2}>Senha</FormLabel>
+                <InputGroup>
+                  <Input type={showSenha ? "text" : "password"} placeholder="Sua senha" value={senha}
+                    onChange={(e) => setSenha(e.target.value)} isDisabled={isLoading} size="lg"
+                    borderRadius="12px" borderColor="#DCE4EC" bg="#FBFCFD" fontSize="sm"
+                    _hover={{ borderColor: "#B8C7D6" }} _focusVisible={{ borderColor: "#438C86", boxShadow: "0 0 0 1px #438C86", bg: "white" }} />
+                  <InputRightElement width="3.25rem" height="full">
+                    <Button h="2rem" w="2rem" size="sm" onClick={toggleShowSenha} variant="ghost" isDisabled={isLoading}
+                      aria-label={showSenha ? "Ocultar senha" : "Mostrar senha"} color="#718198" borderRadius="8px">
+                      {showSenha ? <ViewOffIcon /> : <ViewIcon />}
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+
+              {erro && (
+                <Box p={4} bg={showPaymentLink ? "#FFF9F1" : "#FFF5F3"}
+                  border="1px solid" borderColor={showPaymentLink ? "#F2E2C9" : "#F5D8D3"} borderRadius="14px">
+                  {showPaymentLink ? (
+                    <>
+                      <Flex align="center" gap={3}>
+                        <Flex align="center" justify="center" boxSize="38px" flexShrink={0} borderRadius="12px" bg="#F8EBD6" color="#9A6722" fontWeight="800">!</Flex>
+                        <Box>
+                          <Text color="#634B2B" fontSize="sm" fontWeight="700">Assinatura vencida</Text>
+                          <Text color="#8B765A" fontSize="xs" mt={1}>Renove seu plano para continuar usando a plataforma.</Text>
+                        </Box>
+                      </Flex>
+                      <Button mt={4} w="full" bg="#176D68" color="white" borderRadius="10px"
+                        _hover={{ bg: "#125B57" }} onClick={handleOpenPaymentModal} fontWeight="700" size="sm">
+                        Ver planos e renovar
+                      </Button>
+                    </>
+                  ) : <Text color="#B5473C" fontSize="sm" fontWeight="500" textAlign="center">{erro}</Text>}
+                </Box>
+              )}
+
+              <Stack spacing={4} pt={2}>
+                <Button bg="#176D68" color="white" _hover={{ bg: "#125B57", transform: "translateY(-1px)", boxShadow: "0 10px 22px rgba(23,109,104,.2)" }}
+                  _active={{ bg: "#104F4B", transform: "translateY(0)" }} onClick={handleLogin} w="full" isLoading={isLoading}
+                  loadingText="Entrando" size="lg" borderRadius="12px" fontWeight="700" boxShadow="0 7px 16px rgba(23,109,104,.16)" transition="all .18s">
+                  Entrar na plataforma
+                </Button>
+                <Button variant="ghost" color="#438C86" _hover={{ bg: "#F0F7F6", color: "#176D68" }}
+                  onClick={onResetOpen} isDisabled={isLoading} fontSize="sm" fontWeight="600">
+                  Esqueci minha senha
+                </Button>
+              </Stack>
+            </Stack>
+
+            <Box mt={7} p={4} bg="#F5F8FA" border="1px solid #E6EDF2" borderRadius="14px">
+              <Flex align={{ base: "flex-start", sm: "center" }} justify="space-between" gap={3} direction={{ base: "column", sm: "row" }}>
+                <Box>
+                  <Text color="#34475B" fontSize="sm" fontWeight="700">Para mais informa&ccedil;&otilde;es</Text>
+                  <Text color="#7A8999" fontSize="xs" mt={1}>
+                    Fale com a equipe Strix Solutions: {" "}
+                    <Link href="tel:+5592993847070" color="#287A73" fontWeight="700" whiteSpace="nowrap">(92) 99384-7070</Link>
+                  </Text>
+                </Box>
+                <Button as="a" href="https://wa.me/5592993847070" target="_blank" rel="noopener noreferrer"
+                  size="sm" bg="#E6F3F1" color="#287A73" borderRadius="9px" flexShrink={0}
+                  _hover={{ bg: "#D9ECE9" }}>
+                  WhatsApp
+                </Button>
+              </Flex>
+            </Box>
+
+            <Flex align="center" gap={3} mt={10} color="#9AA6B4" fontSize="xs">
+              <Box flex="1" h="1px" bg="#E9EEF2" />
+              <Text whiteSpace="nowrap">ACESSO SEGURO</Text>
+              <Box flex="1" h="1px" bg="#E9EEF2" />
+            </Flex>
+            <Text fontSize="xs" color="#9AA6B4" textAlign="center" mt={6}>
+              &#169; {new Date().getFullYear()} Strix Solutions
+            </Text>
+          </Box>
+        </Flex>
       </Flex>
 
-      {/* Modal de Recuperação de Senha */}
-      <Modal isOpen={isResetOpen} onClose={onResetClose} isCentered>
-        <ModalOverlay backdropFilter="blur(5px)" />
-        <ModalContent>
-          <ModalHeader>Recuperar Senha</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Text mb={4}>
-              Informe seu e-mail para receber um link de recuperação de senha.
+      <Modal isOpen={isResetOpen} onClose={onResetClose} isCentered size="sm">
+        <ModalOverlay bg="rgba(12, 28, 41, .48)" backdropFilter="blur(4px)" />
+        <ModalContent maxW="440px" mx={4} borderRadius="22px" overflow="hidden"
+          boxShadow="0 24px 72px rgba(16, 38, 58, .22)">
+          <ModalHeader px={6} pt={6} pb={4}>
+            <Flex align="center" gap={3}>
+              <Flex align="center" justify="center" boxSize="46px" borderRadius="14px"
+                bg="#EAF5F4" color="#287A73" fontSize="xl" fontWeight="700">@</Flex>
+              <Box>
+                <Text color="#1C344B" fontSize="lg" fontWeight="700">Recuperar senha</Text>
+                <Text mt={1} color="#7C8B9B" fontSize="xs" fontWeight="400">Acesso seguro pela Strix Solutions</Text>
+              </Box>
+            </Flex>
+          </ModalHeader>
+          <ModalCloseButton top={5} right={5} borderRadius="full" />
+          <ModalBody px={6} pt={2} pb={5}>
+            <Text mb={5} color="#718198" fontSize="sm" lineHeight="1.7">
+              Informe o e-mail da sua conta. Enviaremos um link para criar uma nova senha.
             </Text>
-            
-            <FormControl>
-              <FormLabel>E-mail</FormLabel>
-              <Input
-                type="email"
-                placeholder="seu@email.com"
-                value={resetEmail}
-                onChange={(e) => setResetEmail(e.target.value)}
-                isDisabled={isResetLoading}
-              />
+            <FormControl isRequired>
+              <FormLabel color="#34475B" fontSize="sm" fontWeight="600" mb={2}>E-mail cadastrado</FormLabel>
+              <Input type="email" placeholder="voce@empresa.com" value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)} isDisabled={isResetLoading}
+                size="lg" borderRadius="12px" borderColor="#DCE4EC" bg="#FBFCFD" fontSize="sm"
+                _hover={{ borderColor: "#B8C7D6" }}
+                _focusVisible={{ borderColor: "#438C86", boxShadow: "0 0 0 1px #438C86", bg: "white" }} />
             </FormControl>
 
             {resetError && (
-              <Text color="red.500" fontSize="sm" mt={2}>
-                {resetError}
-              </Text>
+              <Box role="alert" mt={4} px={3.5} py={3} borderRadius="12px" bg="#FFF5F3" border="1px solid #F5D8D3">
+                <Text color="#B5473C" fontSize="sm">{resetError}</Text>
+              </Box>
             )}
-
             {resetSuccess && (
-              <Text color="green.500" fontSize="sm" mt={2}>
-                {resetSuccess}
-              </Text>
+              <Box role="status" mt={4} px={3.5} py={3} borderRadius="12px" bg="#F0F8F3" border="1px solid #D8EBDD">
+                <Text color="#34734C" fontSize="sm">{resetSuccess}</Text>
+              </Box>
             )}
           </ModalBody>
-
-          <ModalFooter>
-            <Button variant="outline" mr={3} onClick={onResetClose} isDisabled={isResetLoading}>
+          <ModalFooter px={6} pt={0} pb={6} gap={3} flexDirection={{ base: "column-reverse", sm: "row" }}>
+            <Button variant="ghost" color="#63758A" borderRadius="11px" onClick={onResetClose}
+              isDisabled={isResetLoading} w={{ base: "full", sm: "auto" }} _hover={{ bg: "#F3F6F8" }}>
               Cancelar
             </Button>
-            <Button
-              colorScheme="teal"
-              onClick={handlePasswordReset}
-              isLoading={isResetLoading}
-              loadingText="Enviando"
-            >
-              Enviar Link de Recuperação
+            <Button bg="#176D68" color="white" borderRadius="11px" onClick={handlePasswordReset}
+              isLoading={isResetLoading} loadingText="Enviando" w={{ base: "full", sm: "auto" }} flex={{ sm: 1 }}
+              _hover={{ bg: "#125B57" }} fontWeight="700">
+              Enviar link de recupera&ccedil;&atilde;o
             </Button>
           </ModalFooter>
         </ModalContent>

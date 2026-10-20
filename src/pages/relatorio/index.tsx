@@ -103,7 +103,7 @@ const DashboardDespesas: React.FC = () => {
   ];
 
   return (
-    <Box mt="80px" px={4}>
+    <Box>
       <Heading size="lg" mb={6} textAlign="center" fontFamily="Montserrat">
         Dashboard de Despesas Gerais
       </Heading>
