@@ -173,6 +173,7 @@ const LoginPage = () => {
         position: "top-right"
       });
 
+      sessionStorage.setItem("strixAnnouncementAfterLogin", "true");
       navigate("/Viagens");
 
     } catch (error: any) {
