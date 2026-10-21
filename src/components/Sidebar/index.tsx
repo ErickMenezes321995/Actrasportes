@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Box, VStack, Link, Text, Flex, IconButton, Collapse, useDisclosure,
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, Badge,
   Drawer, DrawerContent, DrawerOverlay, DrawerCloseButton, Icon, Avatar,
   Menu, MenuButton, MenuList, MenuItem, Image, HStack, Tooltip, Button,
 } from "@chakra-ui/react";
@@ -368,13 +369,13 @@ const Sidebar = ({ children }: SidebarProps) => {
           </ModalHeader>
           <ModalBody px={{ base: 6, md: 9 }} py={{ base: 8, md: 10 }} textAlign="center">
             <Badge colorScheme="teal" borderRadius="full" px={3} py={1} fontSize="10px" letterSpacing="1.2px">
-              NOVA ATUALIZA&Ccedil;&Atilde;O
+              VISUAL RENOVADO
             </Badge>
             <Text mt={4} color="#1B344B" fontSize={{ base: "xl", md: "2xl" }} fontWeight="800" letterSpacing="-.6px">
-              Nova atualiza&ccedil;&atilde;o dispon&iacute;vel em 22/10
+              Uma nova experi&ecirc;ncia para voc&ecirc;
             </Text>
             <Text mt={3} color="#718397" fontSize="sm" lineHeight="1.8">
-              A nova vers&atilde;o da plataforma Strix Solutions estar&aacute; dispon&iacute;vel no dia 22/10, com novas funcionalidades.
+              A plataforma Strix Solutions est&aacute; com um visual renovado: mais moderno, leve e f&aacute;cil de usar. Explore as novidades e aproveite essa nova experi&ecirc;ncia!
             </Text>
             <Text mt={5} color="#9AA8B6" fontSize="xs">
               Este aviso fecha automaticamente em 15 segundos.
