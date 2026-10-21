@@ -647,10 +647,10 @@ const Sidebar = ({ children }: SidebarProps) => {
               NOVA ATUALIZA&Ccedil;&Atilde;O
             </Badge>
             <Text mt={4} color="#1B344B" fontSize={{ base: "xl", md: "2xl" }} fontWeight="800" letterSpacing="-.6px">
-              Nova atualiza&ccedil;&atilde;o dispon&iacute;vel em 22/10
+              Nova atualiza&ccedil;&atilde;o dispon&iacute;vel em 26/10
             </Text>
             <Text mt={3} color="#718397" fontSize="sm" lineHeight="1.8">
-              A nova vers&atilde;o da plataforma Strix Solutions estar&aacute; dispon&iacute;vel no dia 22/10, com novas funcionalidades.
+              A nova vers&atilde;o da plataforma Strix Solutions estar&aacute; dispon&iacute;vel no dia 26/10, com novas funcionalidades.
             </Text>
             <Text mt={5} color="#9AA8B6" fontSize="xs">
               Este aviso fecha automaticamente em 15 segundos.
