@@ -667,7 +667,7 @@ const gerarRelatorioPDF = () => {
     return <Text px={4} pt={10}>Carregando ou viagem não encontrada...</Text>;
   }
 return (
-    <Box bg="transparent" minH="100vh" py={6} marginTop="60px">
+    <Box bg="transparent">
       {isLoading ? (
         <Flex justify="center" align="center" h="100vh">
           <Spinner

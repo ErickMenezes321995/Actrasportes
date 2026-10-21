@@ -403,7 +403,7 @@ const handleSave = async () => {
     return (
       <ThemeProvider theme={extjsTheme}>
         <CSSReset />
-        <Box bg="#e0e0e0" minH="100vh" pt="90px" px={4}>
+        <Box>
           <Box maxW="800px" mx="auto">
             <Text>Carregando...</Text>
           </Box>
@@ -415,7 +415,7 @@ const handleSave = async () => {
   return (
     <ThemeProvider theme={extjsTheme}>
       <CSSReset />
-      <Box bg="transparent" minH="100vh" pt="90px" px={4} marginTop={35}>
+      <Box bg="transparent">
         <Box maxW="800px" mx="auto">
           <Box 
             bg="white" 

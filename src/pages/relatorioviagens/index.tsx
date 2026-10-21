@@ -10,6 +10,7 @@ import {
   CardHeader,
   Flex,
   Heading,
+  Icon,
   IconButton,
   Select,
   SimpleGrid,
@@ -27,6 +28,7 @@ import {
   Center,
 } from "@chakra-ui/react";
 import { RepeatIcon } from "@chakra-ui/icons";
+import { MdAltRoute } from "react-icons/md";
 import {
   Bar,
   BarChart,
@@ -53,6 +55,7 @@ interface Viagem {
   destino: string;
   motorista?: string;
   status: string;
+  dataInicio?: string;
   transacoes: Transacao[];
 }
 
@@ -70,6 +73,22 @@ const converterValor = (valor: number | string): number => {
 
 const formatarMoeda = (valor: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor);
+
+const obterDataViagem = (data?: string): number => {
+  if (!data) return 0;
+
+  const dataBrasileira = data.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  const valor = dataBrasileira
+    ? new Date(Number(dataBrasileira[3]), Number(dataBrasileira[2]) - 1, Number(dataBrasileira[1])).getTime()
+    : new Date(data).getTime();
+
+  return Number.isFinite(valor) ? valor : 0;
+};
+
+const formatarDataViagem = (data?: string): string => {
+  const timestamp = obterDataViagem(data);
+  return timestamp ? new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).format(timestamp) : "Data n?o informada";
+};
 
 const obterTotais = (transacoes: Transacao[]) => {
   const receitas = transacoes
@@ -134,9 +153,11 @@ const RelatorioViagens: React.FC = () => {
   }, [tentativa]);
 
   const viagensVisiveis = useMemo(
-    () => viagemSelecionada === "todas"
+    () => (viagemSelecionada === "todas"
       ? viagens
-      : viagens.filter((viagem) => String(viagem.id) === viagemSelecionada),
+      : viagens.filter((viagem) => String(viagem.id) === viagemSelecionada))
+      .slice()
+      .sort((a, b) => obterDataViagem(b.dataInicio) - obterDataViagem(a.dataInicio)),
     [viagens, viagemSelecionada]
   );
 
@@ -171,7 +192,7 @@ const RelatorioViagens: React.FC = () => {
   }];
 
   return (
-    <Box mt="80px" px={{ base: 0, md: 4 }}>
+    <Box>
       <Card
         w="100%"
         maxW="1400px"
@@ -280,26 +301,37 @@ const RelatorioViagens: React.FC = () => {
             </Card>
           )}
 
-          <Card border="1px" borderColor="#a3bde3" borderRadius="4px" overflow="hidden">
-            <CardHeader bg="#dfeaf5" borderBottom="1px solid #a3bde3" py={3} px={4}>
-              <Flex justify="space-between" align="center">
-                <Heading size="sm" color="#15457b">Resultado por viagem</Heading>
-                <Badge colorScheme="blue">{viagensVisiveis.length} viagens</Badge>
+          <Card border="1px solid #E5EAF2" borderRadius="18px" overflow="hidden"
+            boxShadow="0 12px 32px rgba(28, 50, 80, .07)" mb={2}>
+            <CardHeader bg="white" borderBottom="1px solid #EDF1F6" py={5} px={{ base: 4, md: 6 }}>
+              <Flex justify="space-between" align="center" gap={4}>
+                <Flex align="center" gap={3}>
+                  <Flex align="center" justify="center" boxSize="42px" borderRadius="13px" bg="#EEF4FC" color="#315F9B">
+                    <Icon as={MdAltRoute as React.ElementType} boxSize={5} />
+                  </Flex>
+                  <Box>
+                    <Heading size="sm" color="#1D3553" letterSpacing="-.2px">Resultado por viagem</Heading>
+                    <Text mt={1} fontSize="xs" color="#8492A6">Acompanhamento financeiro de cada rota</Text>
+                  </Box>
+                </Flex>
+                <Badge px={3} py={1.5} borderRadius="full" bg="#EEF4FC" color="#315F9B" fontSize="xs" fontWeight="700">
+                  {viagensVisiveis.length} {viagensVisiveis.length === 1 ? "viagem" : "viagens"}
+                </Badge>
               </Flex>
             </CardHeader>
             <CardBody p={0}>
-              <Box maxH="500px" overflowY="auto" overflowX="auto">
-                <Table size="sm" variant="simple">
-                  <Thead bg="gray.50">
+              <Box maxH="520px" overflowY="auto" overflowX="auto">
+                <Table size="sm" variant="simple" minW="980px">
+                  <Thead bg="#F7F9FC">
                     <Tr>
-                      <Th>Rota</Th>
-                      <Th>Motorista</Th>
-                      <Th>Status</Th>
-                      <Th isNumeric>Receitas</Th>
-                      <Th isNumeric>Despesas</Th>
-                      <Th isNumeric>Adiantamentos</Th>
-                      <Th isNumeric>Saldo</Th>
-                      <Th>Acesso</Th>
+                      <Th py={3.5} color="#8290A5" fontSize="10px" letterSpacing="1px" fontWeight="700" borderColor="#EDF1F6">Rota</Th>
+                      <Th py={3.5} color="#8290A5" fontSize="10px" letterSpacing="1px" fontWeight="700" borderColor="#EDF1F6">Motorista</Th>
+                      <Th py={3.5} color="#8290A5" fontSize="10px" letterSpacing="1px" fontWeight="700" borderColor="#EDF1F6">Status</Th>
+                      <Th py={3.5} color="#8290A5" fontSize="10px" letterSpacing="1px" fontWeight="700" borderColor="#EDF1F6" isNumeric>Receitas</Th>
+                      <Th py={3.5} color="#8290A5" fontSize="10px" letterSpacing="1px" fontWeight="700" borderColor="#EDF1F6" isNumeric>Despesas</Th>
+                      <Th py={3.5} color="#8290A5" fontSize="10px" letterSpacing="1px" fontWeight="700" borderColor="#EDF1F6" isNumeric>Adiantamentos</Th>
+                      <Th py={3.5} color="#8290A5" fontSize="10px" letterSpacing="1px" fontWeight="700" borderColor="#EDF1F6" isNumeric>Saldo</Th>
+                      <Th py={3.5} color="#8290A5" fontSize="10px" letterSpacing="1px" fontWeight="700" borderColor="#EDF1F6">Acesso</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
@@ -327,7 +359,7 @@ const RelatorioViagens: React.FC = () => {
                       );
                     })}
                     {viagensVisiveis.length === 0 && (
-                      <Tr><Td colSpan={8} textAlign="center" py={10} color="gray.500">Nenhuma viagem encontrada.</Td></Tr>
+                      <Tr><Td colSpan={8} textAlign="center" py={12} color="#8290A5">Nenhuma viagem encontrada para este filtro.</Td></Tr>
                     )}
                   </Tbody>
                 </Table>
