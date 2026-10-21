@@ -44,6 +44,7 @@ interface Usuario {
 
 const Sidebar = ({ children }: SidebarProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isAnnouncementOpen, onOpen: openAnnouncement, onClose: closeAnnouncement } = useDisclosure();
   const [collapsed, setCollapsed] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
   const [username, setUsername] = useState("");
@@ -55,6 +56,20 @@ const Sidebar = ({ children }: SidebarProps) => {
   const sidebarBg = "#101E32";
   const borderColor = "whiteAlpha.100";
   const hoverBg = "whiteAlpha.100";
+
+  useEffect(() => {
+    if (sessionStorage.getItem("strixAnnouncementAfterLogin") !== "true") return;
+
+    sessionStorage.removeItem("strixAnnouncementAfterLogin");
+    openAnnouncement();
+  }, [openAnnouncement]);
+
+  useEffect(() => {
+    if (!isAnnouncementOpen) return;
+
+    const timeoutId = window.setTimeout(closeAnnouncement, 15000);
+    return () => window.clearTimeout(timeoutId);
+  }, [isAnnouncementOpen, closeAnnouncement]);
 
   useEffect(() => {
     const loadUserData = () => {
@@ -343,6 +358,34 @@ const Sidebar = ({ children }: SidebarProps) => {
       <Box as="main" ml={{ base: 0, md: sidebarWidth }} pt="88px" minH="100vh" transition="margin-left .2s ease">
         <Box p={{ base: 4, lg: 6 }}>{children}</Box>
       </Box>
+
+      <Modal isOpen={isAnnouncementOpen} onClose={closeAnnouncement} isCentered size="md">
+        <ModalOverlay bg="rgba(10, 27, 40, .58)" backdropFilter="blur(5px)" />
+        <ModalContent maxW="520px" mx={4} borderRadius="24px" overflow="hidden"
+          border="1px solid #E3EBF2" boxShadow="0 28px 80px rgba(9, 29, 47, .28)">
+          <ModalHeader position="absolute" top={0} right={0} p={3} zIndex={1}>
+            <ModalCloseButton position="static" color="#7890A4" borderRadius="full" _hover={{ bg: "#F0F4F7" }} />
+          </ModalHeader>
+          <ModalBody px={{ base: 6, md: 9 }} py={{ base: 8, md: 10 }} textAlign="center">
+            <Badge colorScheme="teal" borderRadius="full" px={3} py={1} fontSize="10px" letterSpacing="1.2px">
+              NOVA ATUALIZA&Ccedil;&Atilde;O
+            </Badge>
+            <Text mt={4} color="#1B344B" fontSize={{ base: "xl", md: "2xl" }} fontWeight="800" letterSpacing="-.6px">
+              Nova atualiza&ccedil;&atilde;o dispon&iacute;vel em 22/10
+            </Text>
+            <Text mt={3} color="#718397" fontSize="sm" lineHeight="1.8">
+              A nova vers&atilde;o da plataforma Strix Solutions estar&aacute; dispon&iacute;vel no dia 22/10, com novas funcionalidades.
+            </Text>
+            <Text mt={5} color="#9AA8B6" fontSize="xs">
+              Este aviso fecha automaticamente em 15 segundos.
+            </Text>
+            <Button mt={6} w="full" h="46px" borderRadius="12px" bg="#176D68" color="white"
+              fontWeight="700" _hover={{ bg: "#125B57" }} onClick={closeAnnouncement}>
+              Continuar para a plataforma
+            </Button>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
