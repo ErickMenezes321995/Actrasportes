@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 // src/pages/preventiva/index.tsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
@@ -138,7 +140,7 @@ const GestaoManutencaoPreventiva: React.FC = () => {
   const carregarDados = useCallback(async () => {
     setIsLoading(true);
     try {
-      const resManutencoes = await fetch("https://backend-frotas.onrender.com/api/manuPrev");
+      const resManutencoes = await apiFetch("/api/manutencoes", { });
       if (!resManutencoes.ok) throw new Error("Erro ao buscar manutenções");
       const dadosManutencoes: ManutencaoPreventiva[] = await resManutencoes.json();
 
@@ -151,7 +153,7 @@ const GestaoManutencaoPreventiva: React.FC = () => {
 
       setManutencoes(dadosManutencoes);
 
-      const resCaminhoes = await fetch("https://backend-frotas.onrender.com/api/caminhoes");
+      const resCaminhoes = await apiFetch("/api/equipamentos", { });
       if (!resCaminhoes.ok) throw new Error("Erro ao buscar caminhões");
       const dadosCaminhoes: Caminhao[] = await resCaminhoes.json();
       
@@ -184,7 +186,7 @@ const GestaoManutencaoPreventiva: React.FC = () => {
 
   const deletarManutencao = async (id: string) => {
     try {
-      const response = await fetch(`https://backend-frotas.onrender.com/api/manuPrev/${id}`, {
+      const response = await apiFetch(`/api/manutencoes/${id}`, { 
         method: "DELETE",
       });
 

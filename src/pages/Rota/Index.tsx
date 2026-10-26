@@ -1,3 +1,4 @@
+import { apiFetch } from "../../services/api";
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -13,6 +14,7 @@ import {
   border,
 } from '@chakra-ui/react';
 import { useParams } from "react-router-dom";
+
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -233,9 +235,7 @@ const Mapa: React.FC<MapaGratuitoProps> = ({
     if (!id) return;
     async function fetchViagemBasica() {
       try {
-        const response = await fetch(
-          `https://gestaofrota.onrender.com/api/viagens/${id}`
-        );
+        const response = await apiFetch(`/api/viagens/${id}`, { });
 
         if (!response.ok) {
           throw new Error("Erro ao buscar viagem");

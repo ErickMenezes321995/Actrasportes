@@ -1,5 +1,6 @@
+import { api as axios } from "../../services/api";
+
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
   Modal,
   ModalOverlay,
@@ -65,10 +66,7 @@ const EditarMotoristaModal: React.FC<EditarMotoristaModalProps> = ({
   const handleSubmit = async () => {
     setIsSaving(true);
     try {
-      const response = await axios.put<Motorista>(
-        `https://backend-frotas.onrender.com/api/motoristas/${formData.id}`,
-        formData
-      );
+      const response = await axios.put(`/api/motoristas/${formData.id}`, formData, { });
       onSalvar(response.data);
       onClose();
       toast({

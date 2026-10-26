@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -102,7 +104,7 @@ const NovoOleoModal: React.FC<NovoOleoModalProps> = ({
 
     setIsSaving(true);
     try {
-      const response = await fetch("https://backend-frotas.onrender.com/api/trocaOleo", {
+      const response = await apiFetch("/api/trocas-oleo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -274,7 +276,7 @@ const NovoOleoModal: React.FC<NovoOleoModalProps> = ({
                 borderRadius="3px"
                 height="32px"
                 _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
-              />
+              maxLength={200} />
             </FormControl>
           </GridItem>
                      

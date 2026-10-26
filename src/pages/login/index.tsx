@@ -8,7 +8,6 @@ import {
   Input,
   InputGroup,
   InputRightElement,
-  Image,
   Link,
   Stack,
   Text,
@@ -26,9 +25,12 @@ import {
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../../firebase/config";
-import { getUserById, Usuario } from "../../services/userService";
+
+import { getApiErrorMessage } from "../../services/apiErrors";
+import { authenticate } from "../../services/authService";
+import { useAuth } from "../../auth/AuthContext";
+import { setStoredUser } from "../../auth/userStorage";
+
 import { ModalPagamento } from "../../components/pagamentos";
 
 const FullScreenLoading = () => {
@@ -75,48 +77,24 @@ const LoginPage = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [erro, setErro] = useState<string>("");
   const [resetError, setResetError] = useState("");
-  const [resetSuccess, setResetSuccess] = useState("");
+  const [resetSuccess] = useState("");
   const [showSenha, setShowSenha] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isResetLoading, setIsResetLoading] = useState(false);
+  const [isResetLoading] = useState(false);
   const [showPaymentLink, setShowPaymentLink] = useState(false);
-  const [inactiveUser, setInactiveUser] = useState<{ id: string; nome: string; email: string; cpf?: string } | null>(null);
+  const [inactiveUser] = useState<{ id: string; nome: string; email: string; cpf?: string } | null>(null);
   
   const { isOpen: isResetOpen, onOpen: onResetOpen, onClose: onResetClose } = useDisclosure();
   const { isOpen: isPaymentOpen, onOpen: onPaymentOpen, onClose: onPaymentClose } = useDisclosure();
   const navigate = useNavigate();
+  const { isAuthenticated, login } = useAuth();
   const toast = useToast();
 
   useEffect(() => {
-    const checkStoredUserStatus = async () => {
-      const userStorage = localStorage.getItem("usuarioLogado");
-      
-      if (userStorage) {
-        try {
-          const usuario = JSON.parse(userStorage);
-          
-          
-          const userData = await getUserById(usuario.id);
-          
-          if (userData && userData.status === true) {
-           
-            localStorage.setItem("usuarioLogado", JSON.stringify(userData));
-            navigate("/Viagens");
-          } else {
-           
-            localStorage.removeItem("usuarioLogado");
-            setErro("Sua conta estÃƒÂ¡ inativa. Entre em contato com o suporte.");
-            setShowPaymentLink(false);
-          }
-        } catch (error) {
-          console.error("Erro ao verificar status:", error);
-          localStorage.removeItem("usuarioLogado");
-        }
-      }
-    };
-    
-    checkStoredUserStatus();
-  }, [navigate]);
+    if (isAuthenticated) {
+      navigate("/Viagens");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleOpenPaymentModal = () => {
     setShowPaymentLink(false);
@@ -130,131 +108,39 @@ const LoginPage = () => {
     setShowPaymentLink(false);
 
     try {
-      
-      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-      const firebaseUser = userCredential.user;
+      const token = await authenticate(email, senha);
+      login(token);
 
-      const userData = await getUserById(firebaseUser.uid);
-
-      if (!userData) {
-        setErro("UsuÃƒÂ¡rio nÃƒÂ£o encontrado no sistema. Contate o administrador.");
-        await auth.signOut();
-        setIsLoading(false);
-        return;
-      }
-
-      
-      if (userData.status === false) {
-        setInactiveUser({
-          id: firebaseUser.uid,
-          nome: userData.nome,
-          email: userData.email,
-          cpf: userData.cpf
-        });
-        
-        setErro("Sua assinatura estÃƒÂ¡ vencida.");
-        setShowPaymentLink(true);
-        
-        await auth.signOut();
-        setIsLoading(false);
-        return;
-      }
-
-      localStorage.setItem("usuarioLogado", JSON.stringify(userData));
-
+      const usuarioLogado = {
+        id: email,
+        nome: email.split("@")[0],
+        email,
+      };
+      setStoredUser(usuarioLogado);
       setEmail("");
       setSenha("");
       setErro("");
 
       toast({
         title: "Login realizado com sucesso!",
-        description: `Bem-vindo(a), ${userData.nome}`,
+        description: "Bem-vindo(a), " + usuarioLogado.nome,
         status: "success",
         duration: 3000,
         isClosable: true,
-        position: "top-right"
+        position: "top-right",
       });
 
       sessionStorage.setItem("strixAnnouncementAfterLogin", "true");
       navigate("/Viagens");
-
-    } catch (error: any) {
-      console.error("Erro no login:", error);
-      
-      if (error.code === "permission-denied") {
-        setErro("Erro de permissÃƒÂ£o. Verifique as regras do Firestore.");
-      } else {
-        switch (error.code) {
-          case "auth/invalid-email":
-            setErro("E-mail invÃƒÂ¡lido");
-            break;
-          case "auth/user-disabled":
-            setErro("UsuÃƒÂ¡rio desativado no sistema");
-            break;
-          case "auth/user-not-found":
-            setErro("UsuÃƒÂ¡rio nÃƒÂ£o encontrado");
-            break;
-          case "auth/wrong-password":
-            setErro("Senha incorreta");
-            break;
-          default:
-            setErro("Erro ao fazer login. Tente novamente.");
-        }
-      }
+    } catch (error) {
+      setErro(getApiErrorMessage(error, error instanceof Error ? error.message : "Erro ao fazer login. Tente novamente."));
       setShowPaymentLink(false);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handlePasswordReset = async () => {
-    setIsResetLoading(true);
-    setResetError("");
-    setResetSuccess("");
-
-    if (!resetEmail) {
-      setResetError("Por favor, informe seu e-mail");
-      setIsResetLoading(false);
-      return;
-    }
-
-    try {
-      await sendPasswordResetEmail(auth, resetEmail);
-      setResetSuccess("E-mail de recuperaÃƒÂ§ÃƒÂ£o enviado! Verifique sua caixa de entrada.");
-      setResetError("");
-      
-      toast({
-        title: "E-mail enviado",
-        description: "Verifique sua caixa de entrada para redefinir sua senha.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "top-right"
-      });
-      
-      setTimeout(() => {
-        onResetClose();
-        setResetEmail("");
-        setResetSuccess("");
-      }, 3000);
-      
-    } catch (error: any) {
-      console.error("Erro ao enviar e-mail de recuperaÃƒÂ§ÃƒÂ£o:", error);
-      
-      switch (error.code) {
-        case "auth/invalid-email":
-          setResetError("E-mail invÃƒÂ¡lido");
-          break;
-        case "auth/user-not-found":
-          setResetError("Nenhuma conta encontrada com este e-mail");
-          break;
-        default:
-          setResetError("Erro ao enviar e-mail de recuperaÃƒÂ§ÃƒÂ£o. Tente novamente.");
-      }
-    } finally {
-      setIsResetLoading(false);
-    }
-  };
+  const handlePasswordReset = async () => { setResetError("A recuperação de senha ainda não está disponível."); };
 
   const toggleShowSenha = () => setShowSenha(!showSenha);
 
@@ -370,6 +256,13 @@ const LoginPage = () => {
                   onClick={onResetOpen} isDisabled={isLoading} fontSize="sm" fontWeight="600">
                   Esqueci minha senha
                 </Button>
+                <Text color="#718198" fontSize="sm" textAlign="center">
+                  Ainda não tem cadastro?{" "}
+                  <Button variant="link" color="#287A73" fontWeight="700" fontSize="sm"
+                    onClick={() => navigate("/cadastro-usuario")} isDisabled={isLoading}>
+                    Cadastre-se
+                  </Button>
+                </Text>
               </Stack>
             </Stack>
 

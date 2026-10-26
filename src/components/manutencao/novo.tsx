@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useState } from "react";
 import {
   Button,
@@ -158,17 +160,12 @@ const NovoManutencaoModal: React.FC<NovoManutencaoModalProps> = ({
 
     setIsSaving(true);
     try {
-      const response = await fetch(
-        "https://backend-frotas.onrender.com/api/manuPrev",
-        {
+      const response = await apiFetch("/api/manutencoes", {
           method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
+          headers: { "Content-Type": "application/json",
+            "Accept": "application/json" },
           body: JSON.stringify(formData),
-        }
-      );
+        });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -490,7 +487,7 @@ const NovoManutencaoModal: React.FC<NovoManutencaoModalProps> = ({
                 borderRadius="3px"
                 height="32px"
                 _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
-              />
+              maxLength={200} />
             </FormControl>
           </GridItem>
          </Grid>

@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -55,7 +57,7 @@ const SelecionarMotoristaEquipamentoModal: React.FC<SelecionarMotoristaEquipamen
   useEffect(() => {
     if (!isOpen) return;
 
-     fetch("https://backend-frotas.onrender.com/api/motoristas")
+     apiFetch("/api/motoristas", { })
       .then((res) => res.json())
       .then((data) => setListaMotoristas(data))
       .catch(() =>
@@ -67,7 +69,7 @@ const SelecionarMotoristaEquipamentoModal: React.FC<SelecionarMotoristaEquipamen
         })
       );
 
-   fetch("https://backend-frotas.onrender.com/api/caminhoes")
+   apiFetch("/api/caminhoes", { })
   .then(res => res.json())
   .then(data => setListaEquipamentos(data))
   .catch(() => {
@@ -98,11 +100,9 @@ const SelecionarMotoristaEquipamentoModal: React.FC<SelecionarMotoristaEquipamen
     return;
   }
 
-  fetch(`https://backend-frotas.onrender.com/api/caminhoes/${equipamentoSelecionado.id}`, {
+  apiFetch(`/api/caminhoes/${equipamentoSelecionado.id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ quilometragemAtual: odometro }),
   })
     .then((res) => {

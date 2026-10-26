@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useState } from "react";
 import {
   Button,
@@ -204,18 +206,12 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
 
     setIsSaving(true);
     try {
-      const response = await fetch(
-        `https://backend-frotas.onrender.com/api/abastecimentos/${formData.id}`,
-        // `http://localhost:5000/api/abastecimentos/${formData.id}`,
-        {
+      const response = await apiFetch(`/api/abastecimentos/${formData.id}`, {
           method: "PUT",
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
+          headers: { "Content-Type": "application/json",
+            "Accept": "application/json" },
           body: JSON.stringify(formData),
-        }
-      );
+        });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -691,7 +687,7 @@ const EditarAbastecimentoModal: React.FC<EditarAbastecimentoModalProps> = ({
                 borderRadius="3px"
                 height="32px"
                 _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}    
-              />
+              maxLength={200} />
             </FormControl>
           </GridItem>
           </Grid>

@@ -1,3 +1,5 @@
+import { api as axios } from "../../services/api";
+
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -24,7 +26,6 @@ import { AddIcon, EditIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons";
 import NovoCaminhaoModal from "../../components/modalequipamento/novocaminhao";
 import EditarCaminhaoModal from "../../components/modalequipamento/editarcaminhao";
 import DetalhesCaminhaoModal from "../../components/modalequipamento/DetalhesCaminhaoModal"; 
-import axios from "axios";
 
 interface Documentacao {
   crlv: string;
@@ -120,7 +121,7 @@ const GestaoCaminhoes: React.FC = () => {
     const fetchCaminhoes = async () => {
       try {
         setIsLoading(true); 
-        const response = await axios.get<Caminhao[]>("https://backend-frotas.onrender.com/api/caminhoes");
+        const response = await axios.get("/api/equipamentos", { });
         
         const dataNormalizada = response.data.map((caminhao: any) => ({
           ...caminhao,
@@ -145,7 +146,7 @@ const GestaoCaminhoes: React.FC = () => {
 
   const deletarCaminhao = async (id: number) => {
     try {
-      await axios.delete(`https://backend-frotas.onrender.com/api/caminhoes/${id}`);
+      await axios.delete(`/api/caminhoes/${id}`, { });
       
       const caminhaoRemovido = caminhoes.find((c) => c.id === id);
       

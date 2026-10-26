@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useState } from "react";
 import {
   Button,
@@ -63,7 +65,8 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const maxLength = name === "cnpj" ? 9 : name === "observacoes" ? 200 : undefined;
+    setFormData((prev) => ({ ...prev, [name]: maxLength ? value.slice(0, maxLength) : value }));
   };
 
   const handleSubmit = async () => {
@@ -82,6 +85,18 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
         return;
       }
 
+      if (!/^\d{9}$/.test(formData.cnpj.trim())) {
+        toast({
+          title: "CNPJ inválido",
+          description: "O CNPJ deve conter exatamente 9 números.",
+          status: "warning",
+          duration: 3000,
+          isClosable: true,
+        });
+        setIsSaving(false);
+        return;
+      }
+
       const payload = {
         ...formData,
         dataCadastro: formData.dataCadastro
@@ -89,14 +104,11 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
           : new Date().toISOString().split("T")[0], 
       };
 
-      const response = await fetch(
-        "https://backend-frotas.onrender.com/api/clientes",
-        {
+      const response = await apiFetch("/api/clientes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
-      );
+        });
 
       const data = await response.json();
 
@@ -178,6 +190,10 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
                   name="cnpj" 
                   value={formData.cnpj} 
                   onChange={handleChange}
+                  inputMode="numeric"
+                  pattern="[0-9]{9}"
+                  minLength={9}
+                  maxLength={9}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -342,6 +358,7 @@ const NovoClienteModal: React.FC<NovoClienteModalProps> = ({ isOpen, onClose, on
                   name="observacoes"
                   value={formData.observacoes}
                   onChange={handleChange}
+                  maxLength={200}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"

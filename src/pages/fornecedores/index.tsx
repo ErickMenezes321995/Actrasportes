@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -100,7 +102,7 @@ const GestaoFornecedores: React.FC = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch("https://backend-frotas.onrender.com/api/fornecedores")
+    apiFetch("/api/fornecedores", { })
       .then((res) => {
         if (!res.ok) throw new Error("Erro na requisição");
         return res.json();
@@ -126,7 +128,7 @@ const GestaoFornecedores: React.FC = () => {
   const deletarFornecedor = (id: number) => {
     const fornecedorRemovido = fornecedores.find((f) => f.id === id);
 
-    fetch(`https://backend-frotas.onrender.com/api/fornecedores/${id}`, {
+    apiFetch(`/api/fornecedores/${id}`, { 
       method: "DELETE",
     })
       .then((res) => {

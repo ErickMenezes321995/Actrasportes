@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useState } from "react";
 import {
   Button,
@@ -17,13 +19,6 @@ import {
   GridItem,
 } from "@chakra-ui/react";
 
-interface Documentacao {
-  crlv?: string;
-  ipvaPago?: boolean;
-  seguro?: string;
-  seguroVeicular?: string;
-}
-
 interface Caminhao {
   id: number;
   placa: string;
@@ -37,13 +32,16 @@ interface Caminhao {
   tipoCombustivel?: string;
   capacidadeTanque?: string;
   quilometragemAtual?: number;
-  trocaOleoData?: string;
-  ultimaManutencao?: string;
-  proximaRevisao?: string;
+  trocaOleoData?: string | null;
+  ultimaManutencao?: string | null;
+  proximaRevisao?: string | null;
   numeroEixos?: number;
   pesoTotal?: string;
   observacoes?: string;
-  documentacao?: Documentacao;
+  crlv?: string;
+  ipvaPago?: boolean;
+  seguro?: string;
+  seguroVeicular?: string;
 }
 
 interface NovoCaminhaoModalProps {
@@ -78,13 +76,22 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
     numeroEixos: 0,
     pesoTotal: "",
     observacoes: "",
-    documentacao: {
-      crlv: "",
-      ipvaPago: undefined,
-      seguro: "",
-      seguroVeicular: "",
-    },
+    crlv: "",
+    ipvaPago: false,
+    seguro: "",
+    seguroVeicular: "",
   });
+
+  const openDatePicker = (e: React.MouseEvent<HTMLInputElement>) => {
+    const input = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+    if (typeof input.showPicker === "function") {
+      try {
+        input.showPicker();
+      } catch {
+        // O navegador pode abrir o calendário nativamente no próprio clique.
+      }
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -114,10 +121,17 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
         return;
       }
 
-      const response = await fetch("https://backend-frotas.onrender.com/api/caminhoes", {
+      const payload = {
+        ...formData,
+        trocaOleoData: formData.trocaOleoData?.trim() || null,
+        ultimaManutencao: formData.ultimaManutencao?.trim() || null,
+        proximaRevisao: formData.proximaRevisao?.trim() || null,
+      };
+
+      const response = await apiFetch("/api/equipamentos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) throw new Error(await response.text());
@@ -152,12 +166,10 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
         numeroEixos: 0,
         pesoTotal: "",
         observacoes: "",
-        documentacao: {
-          crlv: "",
-          ipvaPago: undefined,
-          seguro: "",
-          seguroVeicular: "",
-        },
+        crlv: "",
+        ipvaPago: false,
+        seguro: "",
+        seguroVeicular: "",
       });
 
       onClose();
@@ -401,8 +413,10 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Última Troca de Óleo</FormLabel>
                 <Input 
                   name="trocaOleoData" 
-                  value={formData.trocaOleoData} 
+                  type="date"
+                  value={formData.trocaOleoData || ""} 
                   onChange={handleChange}
+                  onClick={openDatePicker}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -417,8 +431,10 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Última Manutenção</FormLabel>
                 <Input
                   name="ultimaManutencao"
-                  value={formData.ultimaManutencao}
+                  type="date"
+                  value={formData.ultimaManutencao || ""}
                   onChange={handleChange}
+                  onClick={openDatePicker}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -433,8 +449,10 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Próxima Revisão</FormLabel>
                 <Input
                   name="proximaRevisao"
-                  value={formData.proximaRevisao}
+                  type="date"
+                  value={formData.proximaRevisao || ""}
                   onChange={handleChange}
+                  onClick={openDatePicker}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -450,16 +468,8 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>CRLV</FormLabel>
                 <Input
                   name="crlv"
-                  value={formData.documentacao?.crlv || ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      documentacao: {
-                        ...prev.documentacao,
-                        crlv: e.target.value,
-                      },
-                    }))
-                  }
+                  value={formData.crlv || ""}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, crlv: e.target.value }))}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -474,16 +484,8 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Seguro</FormLabel>
                 <Input
                   name="seguro"
-                  value={formData.documentacao?.seguro || ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      documentacao: {
-                        ...prev.documentacao,
-                        seguro: e.target.value,
-                      },
-                    }))
-                  }
+                  value={formData.seguro || ""}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, seguro: e.target.value }))}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -498,16 +500,8 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Seguro Veicular</FormLabel>
                 <Input
                   name="seguroVeicular"
-                  value={formData.documentacao?.seguroVeicular || ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      documentacao: {
-                        ...prev.documentacao,
-                        seguroVeicular: e.target.value,
-                      },
-                    }))
-                  }
+                  value={formData.seguroVeicular || ""}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, seguroVeicular: e.target.value }))}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -523,21 +517,15 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
                 <Select
                   name="ipvaPago"
                   value={
-                    formData.documentacao?.ipvaPago === true
+                    formData.ipvaPago === true
                       ? "true"
-                      : formData.documentacao?.ipvaPago === false
+                      : formData.ipvaPago === false
                       ? "false"
                       : ""
                   }
                   onChange={(e) => {
                     const value = e.target.value === "true";
-                    setFormData((prev) => ({
-                      ...prev,
-                      documentacao: {
-                        ...prev.documentacao,
-                        ipvaPago: value,
-                      },
-                    }));
+                    setFormData((prev) => ({ ...prev, ipvaPago: value }));
                   }}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
@@ -564,7 +552,7 @@ const NovoCaminhaoModal: React.FC<NovoCaminhaoModalProps> = ({
                   borderRadius="3px"
                   height="30px"
                   _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
-                />
+                maxLength={200} />
               </FormControl>
             </GridItem>
 

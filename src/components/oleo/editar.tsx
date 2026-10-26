@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useState } from "react";
 import {
   Button,
@@ -90,14 +92,11 @@ const EditarOleoModal: React.FC<EditarOleoModalProps> = ({
 
     setIsSaving(true);
     try {
-      const response = await fetch(
-        `https://backend-frotas.onrender.com/api/trocaOleo/${formData.id}`,
-        {
+      const response = await apiFetch(`/api/trocas-oleo/${formData.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
-        }
-      );
+        });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -269,7 +268,7 @@ const EditarOleoModal: React.FC<EditarOleoModalProps> = ({
               value={formData.observacoes || ""}
               onChange={handleChange}
               placeholder="Opcional"
-            />
+            maxLength={200} />
           </FormControl>
           </Grid>
         </ModalBody>

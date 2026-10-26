@@ -13,9 +13,9 @@ import {
 } from "react-icons/md";
 import { IconType } from "react-icons";
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../../firebase/config";
-import { onAuthStateChanged } from "firebase/auth";
+import { useAuth } from "../../auth/AuthContext";
+import { getStoredUser } from "../../auth/userStorage";
+
 
 type SidebarProps = {
   children: React.ReactNode;
@@ -30,19 +30,6 @@ type NavItem = {
   disabled?: boolean;
 };
 
-interface Usuario {
-  id: string;
-  nome: string;
-  cpf: string;
-  nascimento: string;
-  email: string;
-  telefone: string;
-  cargo: string;
-  departamento: string;
-  status: string;
-  tipo: string;
-}
-
 const Sidebar = ({ children }: SidebarProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isAnnouncementOpen, onOpen: openAnnouncement, onClose: closeAnnouncement } = useDisclosure();
@@ -53,6 +40,7 @@ const Sidebar = ({ children }: SidebarProps) => {
   const [userEmail, setUserEmail] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
   
   const sidebarBg = "#101E32";
   const borderColor = "whiteAlpha.100";
@@ -73,95 +61,15 @@ const Sidebar = ({ children }: SidebarProps) => {
   }, [isAnnouncementOpen, closeAnnouncement]);
 
   useEffect(() => {
-    const loadUserData = () => {
-      const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          try {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              setUsername(userData.nome || "Usuário");
-              setUserCargo(userData.cargo || "Colaborador");
-              setUserEmail(userData.email || "@Email");
-              
-              localStorage.setItem("usuarioLogado", JSON.stringify({
-                ...userData,
-                id: user.uid
-              }));
-            } else {
-              console.log("Documento do usuário não encontrado");
-              setUsername("Usuário");
-              setUserCargo("Colaborador");
-               setUserEmail("@Email");
-            }
-          } catch (error) {
-            console.error("Erro ao carregar dados do usuário:", error);
-            setUsername("Usuário");
-            setUserCargo("Colaborador");
-             setUserEmail("@Email");
-          }
-        } else {
-          const usuarioLogadoStr = localStorage.getItem("usuarioLogado");
-          if (usuarioLogadoStr) {
-            try {
-              const usuarioLogado: Usuario = JSON.parse(usuarioLogadoStr);
-              setUsername(usuarioLogado.nome || "Usuário");
-              setUserCargo(usuarioLogado.cargo || "Colaborador");
-               setUserEmail(usuarioLogado.email || "@Email");
-            } catch (error) {
-              console.error("Erro ao carregar dados do usuário:", error);
-              setUsername("Usuário");
-              setUserCargo("Colaborador");
-               setUserEmail("@Email");
-            }
-          }
-        }
-      });
-
-      return () => unsubscribe();
+    const syncUser = () => {
+      try {
+        const usuario = getStoredUser<{ nome?: string; cargo?: string; email?: string }>() || {};
+        setUsername(usuario.nome || "Usu�rio"); setUserCargo(usuario.cargo || "Colaborador"); setUserEmail(usuario.email || "");
+      } catch { setUsername("Usu�rio"); setUserCargo("Colaborador"); setUserEmail(""); }
     };
-
-    const unsubscribe = loadUserData();
-
-    const handleStorageChange = () => {
-      const usuarioLogadoStr = localStorage.getItem("usuarioLogado");
-      if (usuarioLogadoStr) {
-        try {
-          const usuarioLogado: Usuario = JSON.parse(usuarioLogadoStr);
-          setUsername(usuarioLogado.nome || "Usuário");
-          setUserCargo(usuarioLogado.cargo || "Colaborador");
-           setUserEmail(usuarioLogado.email || "@Email");
-        } catch (error) {
-          console.error("Erro ao carregar dados do usuário:", error);
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    const interval = setInterval(() => {
-      const usuarioLogadoStr = localStorage.getItem("usuarioLogado");
-      if (usuarioLogadoStr) {
-        try {
-          const usuarioLogado: Usuario = JSON.parse(usuarioLogadoStr);
-          if (usuarioLogado.nome !== username || usuarioLogado.cargo !== userCargo || usuarioLogado.email !== userEmail) {
-            setUsername(usuarioLogado.nome || "Usuário");
-            setUserCargo(usuarioLogado.cargo || "Colaborador");
-             setUserEmail(usuarioLogado.email || "@Email");
-          }
-        } catch (error) {
-          console.error("Erro ao carregar dados do usuário:", error);
-        }
-      }
-    }, 5000);
-
-    return () => {
-      unsubscribe();
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, [username, userCargo, userEmail]);
-
+    syncUser(); window.addEventListener("storage", syncUser);
+    return () => window.removeEventListener("storage", syncUser);
+  }, []);
   const toggleCollapse = () => setCollapsed(!collapsed);
 
   const toggleSubmenu = (label: string) => {
@@ -176,14 +84,7 @@ const Sidebar = ({ children }: SidebarProps) => {
   };
 
   const handleLogout = () => {
-    auth.signOut().then(() => {
-      localStorage.removeItem("usuarioLogado");
-      window.location.href = "/";
-    }).catch((error) => {
-      console.error("Erro ao fazer logout:", error);
-      localStorage.removeItem("usuarioLogado");
-      window.location.href = "/";
-    });
+    logout();
   };
 
   const navItems: NavItem[] = [

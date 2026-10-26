@@ -29,10 +29,8 @@ import {
   extendTheme
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db, auth } from "../../firebase/config";
-import { onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { ModalPagamento } from "../../components/pagamentos";
+import { getStoredUser, setStoredUser } from "../../auth/userStorage";
 
 const extjsTheme = extendTheme({
   colors: {
@@ -165,15 +163,11 @@ interface UserProfile {
 const Perfil: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [editUser, setEditUser] = useState<Partial<UserProfile> | null>(null);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isPaymentOpen, onOpen: onPaymentOpen, onClose: onPaymentClose } = useDisclosure();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
-
+  
 
   const showError = useCallback((message: string) => {
     toast({
@@ -199,48 +193,13 @@ const Perfil: React.FC = () => {
   }, [toast]);
 
 
-  const loadUserData = useCallback(async (uid: string) => {
-    try {
-      const userDoc = await getDoc(doc(db, "users", uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data() as UserProfile;
-        setUser(userData);
-        setEditUser(userData);
-        localStorage.setItem("usuarioLogado", JSON.stringify(userData));
-      } else {
-        showError("Perfil do usuário não encontrado.");
-      }
-    } catch (error) {
-      console.error("Erro ao carregar dados do usuário:", error);
-      showError("Não foi possível carregar os dados do perfil.");
-    }
-  }, [showError]);
-
-
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        await loadUserData(user.uid);
-      } else {
-        const usuarioLogadoStr = localStorage.getItem("usuarioLogado");
-        if (usuarioLogadoStr) {
-          try {
-            const usuarioLogado = JSON.parse(usuarioLogadoStr);
-            setUser(usuarioLogado);
-            setEditUser(usuarioLogado);
-          } catch (error) {
-            console.error("Erro ao carregar dados do usuário:", error);
-            showError("Não foi possível carregar os dados do perfil.");
-          }
-        } else {
-          showError("Usuário não está logado.");
-        }
-      }
-    });
-
-    return () => unsubscribe();
-  }, [loadUserData, showError]);
- 
+    try {
+      const usuario = getStoredUser<UserProfile>();
+      if (!usuario) { showError("Perfil de usuário indisponível."); return; }
+      setUser(usuario); setEditUser(usuario);
+    } catch { showError("Não foi possível carregar os dados do perfil."); }
+  }, [showError]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     if (!editUser) return;
@@ -248,120 +207,11 @@ const Perfil: React.FC = () => {
   };
 
 const handleSave = async () => {
-
-  console.log("🔄 Iniciando atualização do perfil...");
-  console.log("user:", user);
-  console.log("user.uid:", user?.uid);
-  console.log("editUser:", editUser);
-
-  if (!user || !user.uid || typeof user.uid !== 'string' || user.uid.length < 5) {
-    console.error("❌ user ou user.uid inválido:", user);
-    showError("Dados do usuário incompletos. Faça login novamente.");
-    setLoading(false);
-    return;
-  }
-
-  if (!editUser) {
-    console.error("❌ editUser está vazio");
-    showError("Dados de edição não carregados.");
-    setLoading(false);
-    return;
-  }
-
-  setLoading(true);
-  
-  try {
-
-    console.log("📝 Tentando atualizar documento para UID:", user.uid);
-    
-    const userRef = doc(db, "users", user.uid);
-    
-    const updateData = {
-      nome: editUser.nome || "",
-      email: editUser.email || "",
-      telefone: editUser.telefone || "",
-      cpf: editUser.cpf || "",
-      nascimento: editUser.nascimento || "",
-      cargo: editUser.cargo || "",
-      departamento: editUser.departamento || "",
-      status: editUser.status || "ativo",
-      tipo: editUser.tipo || "usuario",
-      updatedAt: new Date()
-    };
-
-    console.log("📦 Dados para atualização:", updateData);
-    
-    await updateDoc(userRef, updateData);
-    
-    const updatedUser = { 
-      ...user, 
-      ...updateData,
-      updatedAt: new Date() 
-    };
-    
-    setUser(updatedUser);
-    setEditUser(updatedUser);
-    localStorage.setItem("usuarioLogado", JSON.stringify(updatedUser));
-    
-    showSuccess("Suas informações foram salvas com sucesso.");
-    onClose();
-  } catch (error: any) {
-    console.error("❌ Erro detalhado ao atualizar:", error);
-    
-    if (error.code) {
-      console.log("Código do erro:", error.code);
-      console.log("Mensagem do erro:", error.message);
-    }
-    
-    showError(error.message || "Não foi possível atualizar o perfil.");
-  }
-
-  setLoading(false);
-};
-
-  const handlePasswordChange = async () => {
-    if (!auth.currentUser) {
-      showError("Usuário não autenticado.");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      showError("As senhas não coincidem.");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      showError("A senha deve ter pelo menos 6 caracteres.");
-      return;
-    }
-
-    setPasswordLoading(true);
-    try {
-      const credential = EmailAuthProvider.credential(
-        auth.currentUser.email!,
-        currentPassword
-      );
-      
-      await reauthenticateWithCredential(auth.currentUser, credential);
-      await updatePassword(auth.currentUser, newPassword);
-      
-      showSuccess("Sua senha foi atualizada com sucesso.");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (error: any) {
-      console.error("Erro ao alterar senha:", error);
-      
-      let errorMessage = "Não foi possível alterar a senha.";
-      if (error.code === "auth/wrong-password") {
-        errorMessage = "Senha atual incorreta.";
-      } else if (error.code === "auth/requires-recent-login") {
-        errorMessage = "Por favor, faça login novamente para alterar sua senha.";
-      }
-      
-      showError(errorMessage);
-    }
-    setPasswordLoading(false);
+    if (!user || !editUser) return;
+    const updatedUser = { ...user, ...editUser, updatedAt: new Date().toISOString() };
+    setStoredUser(updatedUser);
+    setUser(updatedUser); setEditUser(updatedUser);
+    showSuccess("Perfil atualizado neste dispositivo."); onClose();
   };
 
   const formatDate = (timestamp: any) => {
@@ -510,73 +360,6 @@ const handleSave = async () => {
             </Box>
           </Box>
 
-          {/* Card para alteração de senha */}
-          <Box 
-            bg="white" 
-            borderRadius="4px" 
-            boxShadow="0 2px 4px rgba(0, 0, 0, 0.15)" 
-            overflow="hidden"
-          >
-            <Box
-              bg="linear-gradient(to bottom, #f9f9f9, #eaeaea)"
-              borderBottom="1px solid #d0d0d0"
-              py="12px"
-              px="15px"
-              fontWeight="bold"
-              color="#4d4d4d"
-              fontSize="15px"
-            >
-              Alterar Senha
-            </Box>
-            
-            <Box p={5}>
-              <VStack spacing={4} align="stretch">
-                <FormControl>
-                  <FormLabel>Senha Atual</FormLabel>
-                  <Input
-                    variant="extjs"
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Digite sua senha atual"
-                  />
-                </FormControl>
-                
-                <FormControl>
-                  <FormLabel>Nova Senha</FormLabel>
-                  <Input
-                    variant="extjs"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Digite a nova senha (mín. 6 caracteres)"
-                  />
-                </FormControl>
-                
-                <FormControl>
-                  <FormLabel>Confirmar Nova Senha</FormLabel>
-                  <Input
-                    variant="extjs"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirme a nova senha"
-                  />
-                </FormControl>
-                
-                <Button
-                  variant="extjs"
-                  onClick={handlePasswordChange}
-                  isLoading={passwordLoading}
-                  loadingText="Alterando Senha"
-                >
-                  Alterar Senha
-                </Button>
-              </VStack>
-            </Box>
-          </Box>
-        </Box>
-
         {/* Modal para edição */}
         <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
           <ModalOverlay />
@@ -699,6 +482,7 @@ const handleSave = async () => {
             email: user.email
           }}
         />
+      </Box>
       </Box>
     </ThemeProvider>
   );

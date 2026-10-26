@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -59,7 +61,7 @@ interface Viagem {
   transacoes: Transacao[];
 }
 
-const API_URL = "https://backend-frotas.onrender.com/api/viagens";
+const API_URL = "/api/viagens";
 
 const converterValor = (valor: number | string): number => {
   if (typeof valor === "number") return Number.isFinite(valor) ? valor : 0;
@@ -120,13 +122,13 @@ const RelatorioViagens: React.FC = () => {
       setErro("");
 
       try {
-        const respostaViagens = await fetch(API_URL);
+        const respostaViagens = await apiFetch(API_URL, { });
         if (!respostaViagens.ok) throw new Error("Não foi possível carregar as viagens.");
         const viagensApi: Omit<Viagem, "transacoes">[] = await respostaViagens.json();
 
         const viagensComTransacoes = await Promise.all(
           viagensApi.map(async (viagem) => {
-            const respostaTransacoes = await fetch(`${API_URL}/${viagem.id}/transacoes`);
+            const respostaTransacoes = await apiFetch(`${API_URL}/${viagem.id}/transacoes`, { });
             if (!respostaTransacoes.ok) {
               throw new Error("Não foi possível carregar as transações de uma viagem.");
             }

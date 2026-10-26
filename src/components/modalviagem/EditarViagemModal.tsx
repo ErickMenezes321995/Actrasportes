@@ -278,7 +278,7 @@ const handleSalvar = () => {
                   _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
                   resize="vertical"
                   minH="80px"
-                />
+                maxLength={200} />
               </FormControl>
             </GridItem>
           </Grid>

@@ -1,3 +1,6 @@
+import { api as axios } from "../../services/api";
+import { getApiErrorMessage } from "../../services/apiErrors";
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -27,7 +30,6 @@ import { EditIcon, TriangleDownIcon, DeleteIcon, ViewIcon } from "@chakra-ui/ico
 import NovaViagemModal from "../../components/modalviagem/NovaViagemModal";
 import SelecionarMotoristaEquipamentoModal from "../../components/modalviagem/iniciarviagem";
 import EditarViagemModal from "../../components/modalviagem/EditarViagemModal";
-import axios from "axios";
 type StatusViagem = "Pendente" | "Em andamento" | "Concluída" | "Cancelada";
 interface Viagem {
   id: number;
@@ -247,7 +249,7 @@ const GestaoViagens: React.FC = () => {
         const timeout = setTimeout(() => {
           setIsLoading(false);
         }, 20000);
-        const res = await axios.get<Viagem[]>("https://backend-frotas.onrender.com/api/viagens");
+        const res = await axios.get("/api/viagens", { });
         
         clearTimeout(timeout);
         setViagens(res.data);
@@ -292,13 +294,13 @@ const GestaoViagens: React.FC = () => {
   ) => {
     if (!viagemSelecionada) return;
     try {
-      const res = await axios.put(`https://backend-frotas.onrender.com/api/viagens/${viagemSelecionada.id}`, {
+      const res = await axios.put(`/api/viagens/${viagemSelecionada.id}`, {
         motorista,
         viatura,
         dataInicio,
         odometro,
         status: "Em andamento",
-      });
+      }, { });
       setViagens((old): Viagem[] =>
         old.map((v) => (v.id === viagemSelecionada.id ? res.data as Viagem : v))
       );
@@ -321,7 +323,7 @@ const GestaoViagens: React.FC = () => {
   };
   const deletarViagem = async (id: number) => {
     try {
-      await axios.delete(`https://backend-frotas.onrender.com/api/viagens/${id}`);
+      await axios.delete(`/api/viagens/${id}`, { });
       setViagens((old): Viagem[] => old.filter((v) => v.id !== id));
       toast({
         title: "Viagem excluída.",
@@ -381,17 +383,25 @@ const GestaoViagens: React.FC = () => {
               triggerText="Nova viagem"
               onSalvar={async (novaViagem) => {
                 try {
-                  const res = await axios.post("https://backend-frotas.onrender.com/api/viagens", {
+                  const res = await axios.post("/api/viagens", {
                     ...novaViagem,
                     status: "Pendente",
                     transacoes: [],
-                  });
+                  }, { });
                   setViagens((prev): Viagem[] => [...prev, res.data as Viagem]);
-                } catch {
+                } catch (error) {
+                  const apiError = error as {
+                    response?: { status?: number; data?: unknown };
+                  };
+                  console.error("Erro ao criar viagem:", {
+                    status: apiError.response?.status,
+                    resposta: apiError.response?.data,
+                  });
                   toast({
                     title: "Erro ao criar viagem",
+                    description: getApiErrorMessage(error, "O servidor recusou a requisição. Confira sua sessão e os dados enviados."),
                     status: "error",
-                    duration: 3000,
+                    duration: 6000,
                     isClosable: true,
                   });
                 }
@@ -554,7 +564,7 @@ const GestaoViagens: React.FC = () => {
           viagem={viagemParaEditar}
           onSalvar={async (dadosEditados) => {
             try {
-              const res = await axios.put(`https://backend-frotas.onrender.com/api/viagens/${dadosEditados.id}`, dadosEditados);
+              const res = await axios.put(`/api/viagens/${dadosEditados.id}`, dadosEditados, { });
               setViagens((old): Viagem[] =>
                 old.map((v) => (v.id === dadosEditados.id ? res.data as Viagem : v))
               );

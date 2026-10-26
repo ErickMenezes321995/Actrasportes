@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useState } from "react";
 import {
   Button,
@@ -68,14 +70,11 @@ const EditarPneuModal: React.FC<EditarPneuModalProps> = ({
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch(
-        `https://backend-frotas.onrender.com/api/trocaPneus/${formData.id}`,
-        {
+      const response = await apiFetch(`/api/trocaPneus/${formData.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
-        }
-      );
+        });
 
       if (!response.ok) {
         throw new Error("Erro ao atualizar pneu");
@@ -219,7 +218,7 @@ const EditarPneuModal: React.FC<EditarPneuModalProps> = ({
               borderRadius="3px"
               height="32px"
               _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
-            />
+            maxLength={200} />
           </FormControl>
           </Grid>
         </ModalBody>

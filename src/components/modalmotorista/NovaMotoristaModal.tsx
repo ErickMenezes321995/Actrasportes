@@ -1,3 +1,5 @@
+import { api as axios } from "../../services/api";
+
 import React, { useState } from "react";
 import {
   Modal,
@@ -18,7 +20,6 @@ import {
   GridItem,
 } from "@chakra-ui/react";
 import { AddIcon } from "@chakra-ui/icons";
-import axios from "axios";
 
 interface NovaMotoristaModalProps {
   onSalvar: () => void;
@@ -65,7 +66,7 @@ const NovaMotoristaModal: React.FC<NovaMotoristaModalProps> = ({ onSalvar }) => 
   const handleSalvar = async () => {
     setIsSaving(true);
     try {
-      await axios.post("https://backend-frotas.onrender.com/api/motoristas", formData);
+      await axios.post("/api/motoristas", formData, { });
 
       toast({
         title: "Motorista cadastrado com sucesso.",

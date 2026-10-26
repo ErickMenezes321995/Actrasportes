@@ -53,7 +53,6 @@ O sistema foi desenvolvido para empresas de transporte que desejam centralizar t
 
 ## Autenticação
 
-- Firebase Authentication
 
 ---
 
@@ -69,7 +68,6 @@ React (Frontend)
      MongoDb
         │
         ▼
- Firebase Authentication
 ```
 
 ---
@@ -206,7 +204,6 @@ Visualização da rota utilizando:
 
 # Autenticação
 
-O sistema utiliza Firebase Authentication para login.
 
 Funcionalidades:
 

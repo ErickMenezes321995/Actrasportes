@@ -1,5 +1,6 @@
+import { api as axios } from "../../services/api";
+
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Card,
@@ -84,7 +85,7 @@ const GestaoMotoristas: React.FC = () => {
   const fetchMotoristas = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get<Motorista[]>("https://backend-frotas.onrender.com/api/motoristas");
+      const res = await axios.get("/api/motoristas", { });
       setMotoristas(res.data);
     } catch (error) {
       toast({
@@ -104,7 +105,7 @@ const GestaoMotoristas: React.FC = () => {
 
   const deletarMotorista = async (id: number) => {
     try {
-      await axios.delete(`https://backend-frotas.onrender.com/api/motoristas/${id}`);
+      await axios.delete(`/api/motoristas/${id}`, { });
       setMotoristas((prev) => prev.filter((m) => m.id !== id));
       toast({
         title: "Motorista removido",

@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -33,14 +35,14 @@ interface Caminhao {
   chassi: string;
   status: string;
   mecanico?: string;
-  trocaOleoData?: string;
-  ultimaManutencao?: string;
+  trocaOleoData?: string | null;
+  ultimaManutencao?: string | null;
   observacoes?: string;
   cor?: string;
   tipoCombustivel?: string;
   quilometragemAtual?: number;
   numeroEixos?: number;
-  proximaRevisao?: string;
+  proximaRevisao?: string | null;
   pesoTotal?: string;
   capacidadeTanque?: string;
   documentacao?: Documentacao;
@@ -96,19 +98,32 @@ const EditarCaminhaoModal: React.FC<EditarCaminhaoModalProps> = ({
     }));
   };
 
+  const openDatePicker = (e: React.MouseEvent<HTMLInputElement>) => {
+    const input = e.currentTarget as HTMLInputElement & { showPicker?: () => void };
+    if (typeof input.showPicker === "function") {
+      try {
+        input.showPicker();
+      } catch {
+        // O navegador pode abrir o calendário nativamente no próprio clique.
+      }
+    }
+  };
+
   const handleSubmit = async () => {
     setIsSaving(true);
     try {
-      const response = await fetch(
-        `https://backend-frotas.onrender.com/api/caminhoes/${formData.id}`,
-        {
+      const payload = {
+        ...formData,
+        trocaOleoData: formData.trocaOleoData?.trim() || null,
+        ultimaManutencao: formData.ultimaManutencao?.trim() || null,
+        proximaRevisao: formData.proximaRevisao?.trim() || null,
+      };
+
+      const response = await apiFetch(`/api/caminhoes/${formData.id}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
       if (!response.ok) {
         throw new Error("Erro ao salvar");
@@ -364,8 +379,10 @@ const EditarCaminhaoModal: React.FC<EditarCaminhaoModalProps> = ({
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Última troca de óleo</FormLabel>
                 <Input 
                   name="trocaOleoData"
+                  type="date"
                   value={formData.trocaOleoData || ""}
                   onChange={handleChange}
+                  onClick={openDatePicker}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -380,8 +397,10 @@ const EditarCaminhaoModal: React.FC<EditarCaminhaoModalProps> = ({
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Última Manutenção</FormLabel>
                 <Input 
                   name="ultimaManutencao"
+                  type="date"
                   value={formData.ultimaManutencao || ""}
                   onChange={handleChange}
+                  onClick={openDatePicker}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -396,8 +415,10 @@ const EditarCaminhaoModal: React.FC<EditarCaminhaoModalProps> = ({
                 <FormLabel fontSize="12px" fontWeight="600" color="#666666" mb={1}>Próxima Revisão</FormLabel>
                 <Input 
                   name="proximaRevisao"
+                  type="date"
                   value={formData.proximaRevisao || ""}
                   onChange={handleChange}
+                  onClick={openDatePicker}
                   fontSize="13px"
                   border="1px solid #d0d0d0"
                   borderRadius="3px"
@@ -503,7 +524,7 @@ const EditarCaminhaoModal: React.FC<EditarCaminhaoModalProps> = ({
                   borderRadius="3px"
                   height="30px"
                   _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
-                />
+                maxLength={200} />
               </FormControl>
             </GridItem>
 

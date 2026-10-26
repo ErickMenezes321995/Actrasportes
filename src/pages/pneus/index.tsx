@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -72,12 +74,12 @@ const GestaoPneus: React.FC = () => {
       setIsLoading(true);
 
       try {
-        const responsePneus = await fetch("https://backend-frotas.onrender.com/api/trocaPneus");
+        const responsePneus = await apiFetch("/api/troca-pneus", { });
         if (!responsePneus.ok) throw new Error("Erro ao buscar dados de pneus");
         const dataPneus: Pneu[] = await responsePneus.json();
         setPneus(dataPneus);
 
-        const responseCaminhoes = await fetch("https://backend-frotas.onrender.com/api/caminhoes");
+        const responseCaminhoes = await apiFetch("/api/equipamentos", { });
         if (!responseCaminhoes.ok) throw new Error("Erro ao buscar dados de caminhões");
         const dataCaminhoes: Caminhao[] = await responseCaminhoes.json();
         setCaminhoes(dataCaminhoes);
@@ -114,7 +116,7 @@ const GestaoPneus: React.FC = () => {
 
   const deletarPneu = async (id: string) => {
     try {
-      const response = await fetch(`https://backend-frotas.onrender.com/api/trocaPneus/${id}`, {
+      const response = await apiFetch(`/api/trocaPneus/${id}`, { 
         method: "DELETE",
       });
 

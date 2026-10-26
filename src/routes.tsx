@@ -25,6 +25,7 @@ export const RoutesApp = () => {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/viagens" element={<PrivateRoute><Viagens /></PrivateRoute>} />
       <Route path="/motoristas" element={<PrivateRoute><Motoristas /></PrivateRoute>} />
       <Route path="/equipamentos" element={<PrivateRoute><Equipamentos /></PrivateRoute>} />
@@ -41,7 +42,7 @@ export const RoutesApp = () => {
       <Route path="/configuracao" element={<PrivateRoute><Configuracao /></PrivateRoute>} />
       <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
       <Route path="/cadastro-usuario" element={<CadastroUsuario />} />
-      <Route path="/rota/:id" element={<Rota />}/>
+      <Route path="/rota/:id" element={<PrivateRoute><Rota /></PrivateRoute>}/>
     </Routes>
   );
 };

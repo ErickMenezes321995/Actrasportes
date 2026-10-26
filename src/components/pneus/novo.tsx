@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -118,7 +120,7 @@ const NovoPneuModal: React.FC<NovoPneuModalProps> = ({
     setIsSaving(true);
     try {
       
-      const response = await fetch("https://backend-frotas.onrender.com/api/trocaPneus", {
+      const response = await apiFetch("/api/troca-pneus", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -337,7 +339,7 @@ const NovoPneuModal: React.FC<NovoPneuModalProps> = ({
               border="1px solid #d0d0d0"
               borderRadius="3px"
               _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
-            />
+            maxLength={200} />
           </FormControl>
           </Grid>
         </ModalBody>

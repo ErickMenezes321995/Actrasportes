@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -89,7 +91,7 @@ const ModalNovaDespesa: React.FC<Props> = ({ isOpen, onClose, onSalvar, viatura,
     setOficina("");
     setProximaRevisao("");
 
-    fetch("https://backend-frotas.onrender.com/api/caminhoes")
+    apiFetch("/api/caminhoes", { })
       .then((resposta) => {
         if (!resposta.ok) throw new Error("Não foi possível carregar os caminhões.");
         return resposta.json();

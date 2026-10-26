@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useState,  useRef } from "react";
 import {
   Box, 
@@ -85,13 +87,13 @@ const Historico = () => {
         setIsLoading(true);
         loadingTimeout = setTimeout(() => setIsLoading(false), 20000);
 
-      const viagemResponse = await fetch(`https://backend-frotas.onrender.com/api/viagens/${id}`);
+      const viagemResponse = await apiFetch(`/api/viagens/${id}`, { });
       if (!viagemResponse.ok) throw new Error("Erro ao buscar viagem");
 
       const viagemData: Viagem = await viagemResponse.json();
       setViagem(viagemData);
 
-      const transacoesResponse = await fetch(`https://backend-frotas.onrender.com/api/viagens/${id}/transacoes`);
+      const transacoesResponse = await apiFetch(`/api/viagens/${id}/transacoes`, { });
      if (!transacoesResponse.ok) throw new Error("Erro ao buscar transações");
 
      const transacoes: Transacao[] = await transacoesResponse.json();
@@ -131,11 +133,11 @@ useEffect(() => {
       setIsLoading(true); 
       loadingTimeout = setTimeout(() => setIsLoading(false), 20000);
 
-      const viagemResponse = await fetch(`https://backend-frotas.onrender.com/api/viagens/${id}`);
+      const viagemResponse = await apiFetch(`/api/viagens/${id}`, { });
       if (!viagemResponse.ok) throw new Error("Erro ao buscar viagem");
       const viagemData: Viagem & { valorMercadoria?: string | number } = await viagemResponse.json();
 
-      const transacoesResponse = await fetch(`https://backend-frotas.onrender.com/api/viagens/${id}/transacoes`);
+      const transacoesResponse = await apiFetch(`/api/viagens/${id}/transacoes`, { });
       if (!transacoesResponse.ok) throw new Error("Erro ao buscar transações");
       let transacoes: Transacao[] = await transacoesResponse.json();
 
@@ -172,7 +174,7 @@ useEffect(() => {
 
       //   transacoes = [...transacoes, novaTransacao];
         
-      //   const updateResponse = await fetch(`https://backend-frotas.onrender.com/api/viagens/${id}/transacoes`, {
+      //   const updateResponse = await apiFetch(`/api/viagens/${id}/transacoes`, {
       //     method: "PUT",
       //     headers: { "Content-Type": "application/json" },
       //     body: JSON.stringify(transacoes),
@@ -237,7 +239,7 @@ useEffect(() => {
     if (!viagem) return;
 
     try {
-       const response = await fetch(`https://backend-frotas.onrender.com/api/viagens/${viagem.id}`, {
+       const response = await apiFetch(`/api/viagens/${viagem.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...viagem, status: "Concluída" }),
@@ -273,7 +275,7 @@ const handleDeletarTransacao = async () => {
   if (!viagem || idParaDeletar === null) return;
 
   try {
-    const response = await fetch(`https://backend-frotas.onrender.com/api/viagens/transacoes/${idParaDeletar}`, {
+    const response = await apiFetch(`/api/viagens/transacoes/${idParaDeletar}`, { 
       method: "DELETE",
     });
 
@@ -321,7 +323,7 @@ const handleSalvarReceita = async (receita: {
   const transacoesAtualizadas = [...(viagem.transacoes || []), novaTransacao];
 
   try {
-    const response = await fetch(`https://backend-frotas.onrender.com/api/viagens/${viagem.id}/transacoes`, {
+    const response = await apiFetch(`/api/viagens/${viagem.id}/transacoes`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(transacoesAtualizadas),
@@ -355,8 +357,8 @@ const handleSalvarDespesa = async (despesa: NovaDespesaPayload): Promise<boolean
 
   try {
     if (despesa.abastecimento) {
-      const url = "https://backend-frotas.onrender.com/api/abastecimentos";
-      const resposta = await fetch(url, {
+      const url = "/api/abastecimentos";
+      const resposta = await apiFetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
@@ -379,8 +381,8 @@ const handleSalvarDespesa = async (despesa: NovaDespesaPayload): Promise<boolean
     }
 
     if (despesa.manutencao) {
-      const url = "https://backend-frotas.onrender.com/api/manuPrev";
-      const resposta = await fetch(url, {
+      const url = "/api/manuPrev";
+      const resposta = await apiFetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
@@ -407,7 +409,7 @@ const handleSalvarDespesa = async (despesa: NovaDespesaPayload): Promise<boolean
       ...dadosTransacao,
     };
     const transacoesAtualizadas = [...(viagem.transacoes || []), novaTransacao];
-    const respostaTransacoes = await fetch(`https://backend-frotas.onrender.com/api/viagens/${viagem.id}/transacoes`, {
+    const respostaTransacoes = await apiFetch(`/api/viagens/${viagem.id}/transacoes`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(transacoesAtualizadas),
@@ -430,7 +432,7 @@ const handleSalvarDespesa = async (despesa: NovaDespesaPayload): Promise<boolean
     let registroParcial = false;
     if (recursoCriado?.id) {
       try {
-        const respostaRollback = await fetch(`${recursoCriado.url}/${recursoCriado.id}`, { method: "DELETE" });
+        const respostaRollback = await apiFetch(`${recursoCriado.url}/${recursoCriado.id}`, {  method: "DELETE" });
         registroParcial = !respostaRollback.ok;
       } catch {
         registroParcial = true;
@@ -467,14 +469,11 @@ const handleSalvarAdiantamento = async (adiantamento: {
   const transacoesAtualizadas = [...(viagem.transacoes || []), novaTransacao];
 
   try {
-    const response = await fetch(
-      `https://backend-frotas.onrender.com/api/viagens/${viagem.id}/transacoes`,
-      {
+    const response = await apiFetch(`/api/viagens/${viagem.id}/transacoes`, {
         method: "PUT", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(transacoesAtualizadas),
-      }
-    );
+      });
 
     if (!response.ok) throw new Error("Erro ao salvar adiantamento");
 

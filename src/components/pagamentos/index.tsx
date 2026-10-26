@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useState } from 'react';
 import {
   Modal,
@@ -106,11 +108,9 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
   const gerarPix = async (plano: Plano) => {
     setLoading(true);
     try {
-      const response = await fetch('https://backend-frotas.onrender.com/api/pagamentos/criar-pix', {
+      const response = await apiFetch('/api/pagamentos/criar-pix', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           valor: plano.valor,
           descricao: plano.nome,
@@ -157,11 +157,9 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
   const criarCheckout = async (plano: Plano) => {
     setProcessingPayment(true);
     try {
-      const response = await fetch('https://backend-frotas.onrender.com/api/pagamentos/criar-checkout', {
+      const response = await apiFetch('/api/pagamentos/criar-checkout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           valor: plano.valor,
           descricao: plano.nome,
@@ -208,7 +206,7 @@ export const ModalPagamento: React.FC<ModalPagamentoProps> = ({
     if (!paymentId) return;
     
     try {
-      const response = await fetch(`https://backend-frotas.onrender.com/api/pagamentos/status/${paymentId}`);
+      const response = await apiFetch(`/api/pagamentos/status/${paymentId}`, { });
       const data = await response.json();
       
       if (data.success) {

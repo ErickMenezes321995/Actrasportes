@@ -1,3 +1,5 @@
+import { apiFetch } from "../../services/api";
+
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -77,7 +79,7 @@ const NovaViagemModal: React.FC<NovaViagemModalProps> = ({
   useEffect(() => {
     // Buscar clientes ao abrir o modal
     if (isOpen) {
-      fetch("https://backend-frotas.onrender.com/api/clientes")
+      apiFetch("/api/clientes", { })
         .then((res) => res.json())
         .then((data) => setClientes(data))
         .catch((err) => console.error("Erro ao buscar clientes:", err));
@@ -122,9 +124,8 @@ const NovaViagemModal: React.FC<NovaViagemModalProps> = ({
   };
 
   const handleSalvar = () => {
-    // Converte o valor formatado de volta para número (apenas dígitos)
     const valorNumerico = formData.valorMercadoria
-      ? parseFloat(formData.valorMercadoria.replace('R$', '').replace('.', '').replace(',', '.').trim())
+      ? parseFloat(formData.valorMercadoria.replace("R$", "").replace(".", "").replace(",", ".").trim())
       : 0;
 
     const novaViagem: NovaViagemInput = {
@@ -161,7 +162,6 @@ const NovaViagemModal: React.FC<NovaViagemModalProps> = ({
     onSalvar(novaViagem);
     onClose();
 
-    // Resetar o form
     setFormData({
       origem: "",
       destino: "",
@@ -302,7 +302,7 @@ const NovaViagemModal: React.FC<NovaViagemModalProps> = ({
                     _focus={{ borderColor: "#a3bde3", boxShadow: "0 0 0 1px #a3bde3" }}
                     resize="vertical"
                     minH="80px"
-                  />
+                  maxLength={200} />
                 </FormControl>
               </GridItem>
             </Grid>
