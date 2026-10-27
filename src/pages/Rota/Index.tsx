@@ -365,7 +365,7 @@ const calcularDistanciaPercorrida = () => {
   };
 
   return (
-    <Box w="100%" h="80%" position="relative" borderRadius="lg" overflow="hidden" marginTop="55px">
+    <Box w="100%" h="80%" position="relative" borderRadius="lg" overflow="hidden">
       <MapContainer
         center={[-3.0667, -60.0167]} 
         zoom={12}
